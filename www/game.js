@@ -1108,8 +1108,10 @@ function dibujarPuntosJugadores() {
 
 function actualizarBotones() {
     const ocupado = repartiendo || fase === "repartiendo" || fase === "sorteo";
+
     if (!jugadores || jugadores.length === 0 || !jugadores[0] || !jugadores[0].cartas) {
         $("new-btn").disabled = ocupado;
+        actualizarVisibilidadPanel();
         return;
     }
 
@@ -1123,55 +1125,173 @@ function actualizarBotones() {
     $("new-btn").disabled = ocupado;
     $("mus-btn").disabled = !enMus;
     $("cut-btn").disabled = !enMus;
-    if ($("confirm-discard-btn")) $("confirm-discard-btn").disabled = !enDescarte;
 
-    // ▼▼▼ SI ES MI TURNO DE DECLARAR ▼▼▼
+    if ($("confirm-discard-btn")) {
+        $("confirm-discard-btn").disabled = !enDescarte;
+    }
+
+    // SI ES MI TURNO DE DECLARAR
     if (esMiTurnoDeclaracion) {
-        $("declarar-si-btn").disabled = false; // Activo "Tengo"
-        $("declarar-no-btn").disabled = false; // Activo "No tengo"
-        
-        // Desactivo el resto de botones para que no se pueda envidiar ni pasar
-        $("bet-stones-btn").disabled = true; 
+        $("declarar-si-btn").disabled = false;
+        $("declarar-no-btn").disabled = false;
+
+        $("bet-stones-btn").disabled = true;
         $("bet-amarracos-btn").disabled = true;
-        $("pass-bet-btn").disabled = true; 
-        $("accept-bet-btn").disabled = true; 
+        $("pass-bet-btn").disabled = true;
+        $("accept-bet-btn").disabled = true;
         $("decline-bet-btn").disabled = true;
-        return; // Salimos para no tocar los de envite
+
+        actualizarVisibilidadPanel();
+        return;
     } else {
-        // Si no es mi turno de declarar, apago los de declarar
         $("declarar-si-btn").disabled = true;
         $("declarar-no-btn").disabled = true;
     }
-    // ▲▲▲ FIN ▲▲▲
 
-    // --- Lógica normal de envites (Grande, Chica, etc.) ---
+    // LÓGICA NORMAL DE ENVITES
     const enGrande = fase === "grande" && !ocupado;
     const esTurnoHumano = turnoEnviteId === 0;
     const debesResponder = envite.activo && envite.respondiente === 0;
 
     let rivalPuedeAceptar = true;
+
     if (lanceActual === "pares") {
-        rivalPuedeAceptar = jugadores.filter(j => j.equipo === 1).some(j => analizarPares(j).tipo > 0);
+        rivalPuedeAceptar = jugadores
+            .filter(j => j.equipo === 1)
+            .some(j => analizarPares(j).tipo > 0);
+
     } else if (lanceActual === "juego" && hayJuegoEnMesa()) {
-        rivalPuedeAceptar = jugadores.filter(j => j.equipo === 1).some(j => analizarJuego(j).tieneJuego);
+        rivalPuedeAceptar = jugadores
+            .filter(j => j.equipo === 1)
+            .some(j => analizarJuego(j).tieneJuego);
     }
 
-  const puedoAbrirEnvite =
-    enGrande &&
-    esTurnoHumano &&
-    !envite.activo &&
-    jugadorPuedeIntervenir(jugadores[0], lanceActual) &&
-    rivalPuedeAceptar;
-    const puedoReenvidar = debesResponder && puedeEnvidarEnLance(0, lanceActual) && (envite.base + envite.pendiente) < 12;
+    const puedoAbrirEnvite =
+        enGrande &&
+        esTurnoHumano &&
+        !envite.activo &&
+        jugadorPuedeIntervenir(jugadores[0], lanceActual) &&
+        rivalPuedeAceptar;
+
+    const puedoReenvidar =
+        debesResponder &&
+        puedeEnvidarEnLance(0, lanceActual) &&
+        (envite.base + envite.pendiente) < 12;
+
     const puedeEnvidar = puedoAbrirEnvite || puedoReenvidar;
 
-    $("bet-stones-btn").disabled    = !puedeEnvidar;
+    $("bet-stones-btn").disabled = !puedeEnvidar;
     $("bet-amarracos-btn").disabled = !puedeEnvidar;
-   const humanoPuedePasar =
-    jugadorPuedeIntervenir(jugadores[0], lanceActual);
-    if ($("pass-bet-btn")) $("pass-bet-btn").disabled = !(enGrande && esTurnoHumano && !envite.activo && humanoPuedePasar);
-    $("accept-bet-btn").disabled  = !debesResponder || ocupado;
+
+    const humanoPuedePasar =
+        jugadorPuedeIntervenir(jugadores[0], lanceActual);
+
+    if ($("pass-bet-btn")) {
+        $("pass-bet-btn").disabled =
+            !(enGrande && esTurnoHumano && !envite.activo && humanoPuedePasar);
+    }
+
+    $("accept-bet-btn").disabled = !debesResponder || ocupado;
     $("decline-bet-btn").disabled = !debesResponder || ocupado;
+
+    // ACTUALIZAR QUÉ BOTONES SE VEN
+    actualizarVisibilidadPanel();
+}
+
+
+// =============================================
+// VISIBILIDAD DEL PANEL DE CONTROLES
+// =============================================
+function actualizarVisibilidadPanel() {
+    const panel = $("controls-panel");
+    if (!panel) return;
+
+    const hayJugadores =
+        jugadores &&
+        jugadores.length > 0 &&
+        jugadores[0] &&
+        jugadores[0].cartas;
+
+    const botonNuevo = $("new-btn");
+
+    // Mostrar Nueva mano al inicio y al terminar una mano
+    if (botonNuevo) {
+        botonNuevo.hidden = !(
+            fase === "inicio" ||
+            fase === "finMano"
+        );
+    }
+
+    // Botones que dependen de la fase y del turno
+    const botones = [
+        "mus-btn",
+        "cut-btn",
+        "confirm-discard-btn",
+        "declarar-si-btn",
+        "declarar-no-btn",
+        "bet-stones-btn",
+        "bet-amarracos-btn",
+        "pass-bet-btn",
+        "accept-bet-btn",
+        "decline-bet-btn"
+    ];
+
+    botones.forEach(id => {
+        const boton = $(id);
+
+        if (boton) {
+            boton.hidden = !hayJugadores || boton.disabled;
+        }
+    });
+
+    // Comprobar si queda algún botón que deba mostrarse
+    const todosLosIds = ["new-btn", ...botones];
+
+    const hayAlgunBotonVisible = todosLosIds.some(id => {
+        const boton = $(id);
+        return boton && !boton.hidden;
+    });
+
+    // Si no hay acciones para el jugador, desaparece todo el panel
+    panel.hidden = !hayAlgunBotonVisible;
+}
+// =============================================
+// VISIBILIDAD DEL PANEL DE CONTROLES
+// =============================================
+
+function actualizarVisibilidadPanel() {
+    const hayJugadores = jugadores &&
+        jugadores.length > 0 &&
+        jugadores[0] &&
+        jugadores[0].cartas;
+
+    const botonNuevo = $("new-btn");
+
+    // Nueva mano solo aparece al inicio o al terminar una mano.
+    botonNuevo.hidden = !(
+        fase === "inicio" ||
+        fase === "finMano"
+    );
+
+    const botones = [
+        "mus-btn",
+        "cut-btn",
+        "confirm-discard-btn",
+        "declarar-si-btn",
+        "declarar-no-btn",
+        "bet-stones-btn",
+        "bet-amarracos-btn",
+        "pass-bet-btn",
+        "accept-bet-btn",
+        "decline-bet-btn"
+    ];
+
+    botones.forEach(id => {
+        const boton = $(id);
+        if (boton) {
+            boton.hidden = !hayJugadores || boton.disabled;
+        }
+    });
 }
 // =============================================
 // 13. MUS Y NO HAY MUS

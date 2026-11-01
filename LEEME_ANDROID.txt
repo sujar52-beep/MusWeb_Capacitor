@@ -1,0 +1,49 @@
+# MusWeb - Preparación para Android con Capacitor
+
+Este paquete conserva el juego web y añade la estructura necesaria para convertirlo en una aplicación Android.
+
+## Estructura
+
+- `index.html`, `style.css`, `game.js`, `cartas/`: archivos fuente que editarás en VS Code.
+- `www/`: copia web que Capacitor empaqueta dentro de la aplicación.
+- `capacitor.config.ts`: identificador y configuración de la aplicación.
+- `prepare-web.mjs`: copia los archivos fuente actualizados a `www/`.
+
+## Requisitos en Windows 11
+
+1. Node.js 22 o superior.
+2. Android Studio instalado.
+3. Android SDK instalado desde Android Studio > Tools > SDK Manager.
+
+## Primer inicio
+
+Abre esta carpeta (`MusWeb_Capacitor`) en VS Code. En Terminal > New Terminal, ejecuta:
+
+```powershell
+node --version
+npm --version
+npm install
+npx cap add android
+npm run android:sync
+npx cap open android
+```
+
+La primera vez, Android Studio puede tardar en descargar y configurar Gradle y el SDK. Acepta las instalaciones que solicite.
+
+## Para actualizar el juego después de modificarlo
+
+Cada vez que cambies `index.html`, `style.css`, `game.js` o las imágenes de `cartas/`, ejecuta:
+
+```powershell
+npm run android:sync
+```
+
+Después, en Android Studio, pulsa Run para probarlo en el móvil o emulador.
+
+## Importante
+
+- No edites los archivos dentro de `www/`: son una copia generada desde los archivos fuente de la raíz.
+- No borres `android/` una vez creado; contiene el proyecto nativo.
+- El identificador inicial de la app es `com.jcsg.musweb`. Conviene mantenerlo estable después de instalar/publicar la app.
+- Este paquete todavía no incluye la carpeta `android/`: se genera en tu PC con `npx cap add android`.
+- La interfaz móvil se revisará en una fase posterior con el juego ejecutándose en un dispositivo real; no se han cambiado las reglas ni la lógica de Mus.

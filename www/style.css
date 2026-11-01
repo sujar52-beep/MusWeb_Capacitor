@@ -406,201 +406,6 @@ footer {
     animation: ficha-aparece 180ms ease-out;
 }
 
-.bet-token.amarraco {
-    flex-basis: 42px;
-    width: 42px;
-    height: 42px;
-    background: radial-gradient(circle at 30% 25%, #60a5fa, #2563eb 90%);
-    border: 3px double #ffe9a1;
-}
-
-@keyframes ficha-aparece {
-    from { opacity: 0; transform: translateY(-12px) scale(.7); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* =============================================
-   8. CARTA DEL SORTEO
-   ============================================= */
-
-.carta-sorteo {
-    display: none;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 0;
-    transition: opacity 300ms ease;
-    z-index: 1000;
-}
-
-.carta-sorteo.visible {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    background: rgba(5, 45, 29, 0.96); /* Fondo para tapar lo de abajo */
-    z-index: 1000
-}
-
-.carta-sorteo .card {
-    flex: 0 1 200px !important;   /* Forzar tamaño, anulando la regla general de .card */
-    width: 145px !important;     /* Forzar tamaño, anulando la regla general de .card */
-    animation: carta-sorteo-entra 800ms ease-out;
-    box-shadow: 0 8px 20px #000a, 0 0 0 4px #f1d28b;
-}
-
-.carta-sorteo .carta-palo-texto {
-    margin-top: 12px;
-    color: var(--gold);
-    font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-}
-
-@keyframes carta-sorteo-entra {
-    from { opacity: 0; transform: translateY(-40px) rotate(-12deg) scale(0.7); }
-    to   { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
-}
-
-@media (max-width: 700px) {
-    .carta-sorteo .card {
-        flex: 0 0 150px; /* Más grande en móvil */
-        width: 150px;
-    }
-    .carta-sorteo.visible {
-        min-height: 220px; /* Más alto en móvil */
-    }
-    .carta-sorteo .carta-palo-texto {
-        font-size: 14px;
-    }
-}
-
-/* =============================================
-   9. HUECOS DE CARTA DURANTE EL REPARTO
-   ============================================= */
-
-.card-slot {
-    flex: 0 0 80px;
-    width: 80px;
-    aspect-ratio: 207 / 319;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.side-player .card-slot {
-    flex: 0 0 95px;
-    width: 95px;
-}
-
-.carta-recien-llegada {
-    animation: carta-aterriza 300ms ease-out;
-}
-
-@keyframes carta-aterriza {
-    from { transform: scale(0.9); opacity: 0.6; }
-    to   { transform: scale(1); opacity: 1; }
-}
-
-/* =============================================
-   10. FASE DE DESCARTE
-   ============================================= */
-
-.card.seleccionable {
-    cursor: pointer;
-    transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
-}
-
-.card.seleccionable:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 14px #0007;
-}
-
-.card.seleccionada {
-    transform: translateY(10px) scale(0.94);
-    opacity: 0.45;
-    box-shadow: inset 0 0 0 3px #d64b4b, 0 4px 8px #0005;
-}
-
-.card.seleccionada::after {
-    content: "✕";
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #d64b4b;
-    font-size: 34px;
-    font-weight: bold;
-    pointer-events: none;
-}
-
-.card.recien-robada {
-    animation: carta-nueva 320ms ease-out;
-}
-
-@keyframes carta-nueva {
-    from { transform: translateY(-20px); opacity: 0; }
-    to   { transform: translateY(0); opacity: 1; }
-}
-
-/* =============================================
-   11. VOLTEO AL FINAL DE LA MANO
-   ============================================= */
-
-.carta-volteada {
-    animation: voltear-carta 2000ms ease-out both;
-    transform-style: preserve-3d;
-}
-
-@keyframes voltear-carta {
-    from {
-        transform: rotateY(180deg);
-    }
-    to {
-        transform: rotateY(0deg);
-    }
-}
-
-/* =============================================
-   12. AVISO DE FIN DE MANO
-   ============================================= */
-
-.aviso-fin-mano {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #0b3822ee;
-    border: 2px solid #d9b66b;
-    border-radius: 12px;
-    padding: 12px 22px;
-    color: #fffaf0;
-    font-weight: bold;
-    z-index: 2000;
-    box-shadow: 0 8px 20px #0008;
-    text-align: center;
-    min-width: 260px;
-}
-
-.aviso-fin-mano strong {
-    color: var(--gold);
-    display: block;
-    margin-bottom: 6px;
-    font-size: 16px;
-}
-
-/* =============================================
-   13. MARCA DEL JUGADOR MANO
-   ============================================= */
-
-.mano-marca {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-    z-index: 100;
-}
-
 .mano-marca[hidden] {
     display: none;
 }
@@ -802,6 +607,202 @@ footer {
     transform: none;
 }
 
+.bet-token.amarraco {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    background: radial-gradient(circle at 30% 25%, #60a5fa, #2563eb 90%);
+    border: 3px double #ffe9a1;
+}
+
+@keyframes ficha-aparece {
+    from { opacity: 0; transform: translateY(-12px) scale(.7); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* =============================================
+   8. CARTA DEL SORTEO
+   ============================================= */
+
+.carta-sorteo {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    transition: opacity 300ms ease;
+    z-index: 1000;
+}
+
+.carta-sorteo.visible {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    background: rgba(5, 45, 29, 0.96); /* Fondo para tapar lo de abajo */
+    z-index: 1000
+}
+
+.carta-sorteo .card {
+    flex: 0 1 200px !important;   /* Forzar tamaño, anulando la regla general de .card */
+    width: 145px !important;     /* Forzar tamaño, anulando la regla general de .card */
+    animation: carta-sorteo-entra 800ms ease-out;
+    box-shadow: 0 8px 20px #000a, 0 0 0 4px #f1d28b;
+}
+
+.carta-sorteo .carta-palo-texto {
+    margin-top: 12px;
+    color: var(--gold);
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+}
+
+@keyframes carta-sorteo-entra {
+    from { opacity: 0; transform: translateY(-40px) rotate(-12deg) scale(0.7); }
+    to   { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@media (max-width: 700px) {
+    .carta-sorteo .card {
+        flex: 0 0 150px; /* Más grande en móvil */
+        width: 150px;
+    }
+    .carta-sorteo.visible {
+        min-height: 220px; /* Más alto en móvil */
+    }
+    .carta-sorteo .carta-palo-texto {
+        font-size: 14px;
+    }
+}
+
+/* =============================================
+   9. HUECOS DE CARTA DURANTE EL REPARTO
+   ============================================= */
+
+.card-slot {
+    flex: 0 0 80px;
+    width: 80px;
+    aspect-ratio: 207 / 319;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.side-player .card-slot {
+    flex: 0 0 95px;
+    width: 95px;
+}
+
+.carta-recien-llegada {
+    animation: carta-aterriza 300ms ease-out;
+}
+
+@keyframes carta-aterriza {
+    from { transform: scale(0.9); opacity: 0.6; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+/* =============================================
+   10. FASE DE DESCARTE
+   ============================================= */
+
+.card.seleccionable {
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.card.seleccionable:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 14px #0007;
+}
+
+.card.seleccionada {
+    transform: translateY(10px) scale(0.94);
+    opacity: 0.45;
+    box-shadow: inset 0 0 0 3px #d64b4b, 0 4px 8px #0005;
+}
+
+.card.seleccionada::after {
+    content: "✕";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d64b4b;
+    font-size: 34px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.card.recien-robada {
+    animation: carta-nueva 320ms ease-out;
+}
+
+@keyframes carta-nueva {
+    from { transform: translateY(-20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+/* =============================================
+   11. VOLTEO AL FINAL DE LA MANO
+   ============================================= */
+
+.carta-volteada {
+    animation: voltear-carta 2000ms ease-out both;
+    transform-style: preserve-3d;
+}
+
+@keyframes voltear-carta {
+    from {
+        transform: rotateY(180deg);
+    }
+    to {
+        transform: rotateY(0deg);
+    }
+}
+
+/* =============================================
+   12. AVISO DE FIN DE MANO
+   ============================================= */
+
+.aviso-fin-mano {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0b3822ee;
+    border: 2px solid #d9b66b;
+    border-radius: 12px;
+    padding: 12px 22px;
+    color: #fffaf0;
+    font-weight: bold;
+    z-index: 2000;
+    box-shadow: 0 8px 20px #0008;
+    text-align: center;
+    min-width: 260px;
+}
+
+.aviso-fin-mano strong {
+    color: var(--gold);
+    display: block;
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+/* =============================================
+   13. MARCA DEL JUGADOR MANO
+   ============================================= */
+
+.mano-marca {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    z-index: 100;
+}
+
+
 /* Ajuste móvil */
 @media (max-width: 700px) {
     .mazo-slot {
@@ -850,165 +851,258 @@ footer {
         height: calc(60px * (319 / 207));
     }
 }
+
+        
+ /* =============================================
+
 /* =============================================
    17. PANTALLAS PEQUEÑAS (MÓVIL)
    ============================================= */
 
 @media (max-width: 700px) {
-    .game { padding: 10px; }
-    .table { height: 700px; min-height: 700px; padding: 8px; border-width: 5px; border-radius: 18px; }
-    
-    .partner { top: 12px; width: 250px; max-width: 48%; }
-    .you { bottom: 12px; width: 55%; }
+
+    .game {
+        padding: 10px;
+    }
+
+    .table {
+        height: 700px;
+        min-height: 700px;
+        padding: 8px;
+        border-width: 5px;
+        border-radius: 18px;
+    }
+
+    .partner {
+        top: 12px;
+        width: 250px;
+        max-width: 48%;
+    }
+
+    .you {
+        bottom: 12px;
+        width: 55%;
+    }
+
     .side-player {
-    width: 100px;
-    height: 300px;
-}
+        width: 100px;
+        height: 300px;
+    }
 
-.side-player.left {
-    left: 36px;
-    right: auto;
-}
+    .side-player.left {
+        left: 36px;
+        right: auto;
+    }
 
-.side-player.right {
-    right: 36px;
-    left: auto;
-}
+    .side-player.right {
+        right: 36px;
+        left: auto;
+    }
 
-    .card, .side-player .card, .card-slot, .side-player .card-slot {
+    .card,
+    .side-player .card,
+    .card-slot,
+    .side-player .card-slot {
         flex-basis: 75px;
         width: 75px;
     }
 
-    .partner .card, .partner .card-slot,
-    #player-bottom .card, #player-bottom .card-slot {
+    .partner .card,
+    .partner .card-slot,
+    #player-bottom .card,
+    #player-bottom .card-slot {
         flex-basis: 90px;
         width: 90px;
     }
 
     .side-player .hand {
-    width: 300px;
-}
-
-
-.side-player.left .hand {
-    left: -12px;
-    right: auto;
-    transform: translate(-50%, -50%) rotate(-90deg);
-}
-
-.side-player.right .hand {
-    left: auto;
-    right: -12px;
-    transform: translate(50%, -50%) rotate(90deg);
-}
-
-    .hand { gap: 3px; }
-
-    .center-message { width: 42%; }
-    .center-message p { font-size: 15px; }
-    .log, .discard-help { font-size: 10px; }
-
-    button { padding: 12px 14px; font-size: 13px; }
-    
-    #bet-area { padding: 6px; }
-    .bet-token { width: 23px; height: 23px; flex-basis: 23px; }
-    .bet-token.amarraco { width: 31px; height: 31px; flex-basis: 31px; }
-    
-    .carta-sorteo .card { flex: 0 0 70px; width: 70px; }
-    .carta-sorteo.visible { min-height: 100px; }
-    .card.seleccionada::after { font-size: 24px; }
-
-    .bocadillo { padding: 10px 14px; font-size: 13px; }
-
-    .mazo-slot { width: 60px; height: calc(60px * (319 / 207)); }
-    .mazo-fijo { width: 60px; height: calc(60px * (319 / 207)); }
-
-    /* Marcador móvil */
-    .marcador-movil {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 8px 5px;
-        background: #0b3822;
-        color: #ffffff;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        width: 300px;
     }
 
-    .marcador-tabla {
-        display: grid;
-        grid-template-columns: minmax(88px, 1.35fr) repeat(6, minmax(43px, 1fr));
-        min-width: 346px;
-        max-width: 100%;
-        box-sizing: border-box;
-        border: 2px solid #4e8264;
-        border-radius: 17px;
-        padding: 5px;
-        background: #0b3822;
+    .side-player.left .hand {
+        left: -12px;
+        right: auto;
+        transform: translate(-50%, -50%) rotate(-90deg);
+    }
+
+    .side-player.right .hand {
+        left: auto;
+        right: -12px;
+        transform: translate(50%, -50%) rotate(90deg);
+    }
+
+    .hand {
+        gap: 3px;
+    }
+
+    .center-message {
+        width: 42%;
+    }
+
+    .center-message p {
+        font-size: 15px;
+    }
+
+    .log,
+    .discard-help {
         font-size: 10px;
-        text-align: center;
     }
 
-    .marcador-cabecera, .marcador-fila { display: contents; }
+    button {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
 
-    .marcador-cabecera > div {
-        min-height: 35px;
-        display: flex; align-items: center; justify-content: center;
+    #bet-area {
+        padding: 6px;
+    }
+
+    .bet-token {
+        width: 23px;
+        height: 23px;
+        flex-basis: 23px;
+    }
+
+    .bet-token.amarraco {
+        width: 31px;
+        height: 31px;
+        flex-basis: 31px;
+    }
+
+    .carta-sorteo .card {
+        flex: 0 0 70px;
+        width: 70px;
+    }
+
+    .carta-sorteo.visible {
+        min-height: 100px;
+    }
+
+    .card.seleccionada::after {
+        font-size: 24px;
+    }
+
+    .bocadillo {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .mazo-slot {
+        width: 60px;
+        height: calc(60px * (319 / 207));
+    }
+
+    .mazo-fijo {
+        width: 60px;
+        height: calc(60px * (319 / 207));
+    }
+
 }
 
-.descarte-central {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 96px; /* Ancho de una carta de jugador */
-    height: 140px; /* Alto de una carta de jugador */
-    border: 1px solid rgba(217, 182, 107, 0.3);
-    border-radius: 8px;
-    transition: opacity 200ms ease;
-    perspective: 500px;
+
+/* =============================================
+   MARCADOR MÓVIL - SIETE COLUMNAS HORIZONTALES
+   ============================================= */
+
+.marcador-movil {
+    display: block !important;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
+    background: #0b3822;
+    color: #ffffff;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.descarte-central .card {
-    position: absolute !important;
-    inset: 0;
-    width: 69%;
-    height: 73%;
-    color: #b7d9bd; 
-    font-weight: bold;
+.marcador-tabla {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    min-width: 346px;
+    box-sizing: border-box;
+    border: 2px solid #4e8264;
+    border-radius: 12px;
+    padding: 3px;
+    background: #0b3822;
+    gap: 1px;
     font-size: 9px;
-    padding: 2px 0;
-    }
+    text-align: center;
+}
 
-    .marcador-fila > div {
-        min-height: 44px;
-        display: flex; align-items: center; justify-content: center;
-        box-sizing: border-box; font-size: 12px; font-weight: bold; border-radius: 7px; margin: 1px;
-    }
+.marcador-cabecera,
+.marcador-fila {
+    display: grid !important;
+    grid-template-columns: 88px repeat(6, minmax(43px, 1fr)) !important;
+    grid-auto-flow: row !important;
+    width: 100%;
+    min-width: 346px;
+    gap: 0;
+    align-items: stretch;
+}
 
-    .marcador-fila .equipo {
-        justify-content: flex-start; padding-left: 5px; color: #ffffff; font-size: 10px;
-    }
+.marcador-cabecera > div,
+.marcador-fila > div {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    min-height: 22px;
+    box-sizing: border-box;
+    padding: 0 2px;
+    margin: 0;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: bold;
+    border-radius: 3px;
+    overflow: hidden;
+    white-space: nowrap;
+}
 
-    .marcador-partidas.nosotros { background: #ed8918; color: #ffffff; font-size: 17px; }
-    .marcador-partidas.ellos { background: #399ddd; color: #ffffff; font-size: 17px; }
+.marcador-fila .equipo {
+    justify-content: flex-start;
+    padding-left: 3px;
+    color: #ffffff;
+    font-size: 8px;
+}
 
-    .fila-en-juego > div { color: #f5d94d; min-height: 38px; }
-    .fila-en-juego .equipo { color: #c0dfc5; }
+.marcador-partidas.nosotros {
+    background: #ed8918;
+    color: #ffffff;
+    font-size: 13px;
+}
 
-    .marcador-tabla .lance-activo {
-        background: #f3d34a !important; color: #163b25 !important;
-        box-shadow: inset 0 0 0 2px #fff0a0; border-radius: 7px; font-weight: 900;
-    }
+.marcador-partidas.ellos {
+    background: #399ddd;
+    color: #ffffff;
+    font-size: 13px;
+}
 
-    .marcador-tabla .marcador-cabecera > div.lance-activo {
-        background: #f3d34a !important; color: #163b25 !important;
-    }
+.fila-en-juego > div {
+    color: #f5d94d;
+}
+
+.fila-en-juego .equipo {
+    color: #c0dfc5;
+}
+
+.marcador-tabla .lance-activo {
+    background: #f3d34a !important;
+    color: #163b25 !important;
+    box-shadow: inset 0 0 0 1px #fff0a0;
+    border-radius: 3px;
+    font-weight: 900;
+}
 
 
-/* Indicador de mano: visible dentro de la caja de apuestas, sin tapar cartas. */
-#bet-area { position: relative; }
+/* =============================================
+   INDICADOR DE MANO
+   ============================================= */
+
+#bet-area {
+    position: relative;
+}
+
 .mano-marca-lateral {
     position: absolute;
     display: block;
@@ -1023,26 +1117,54 @@ footer {
     z-index: 500;
     pointer-events: none;
 }
-.mano-marca-lateral[hidden] { display: none !important; }
-#mano-marca-abajo { left: 50%; bottom: 7px; transform: translateX(-50%); }
-#mano-marca-arriba { left: 50%; top: 7px; transform: translateX(-50%); }
-#mano-marca-izquierda { left: 7px; top: 50%; transform: translateY(-50%); }
-#mano-marca-derecha { right: 7px; top: 50%; transform: translateY(-50%); }
+
+.mano-marca-lateral[hidden] {
+    display: none !important;
+}
+
+#mano-marca-abajo {
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+}
+
+#mano-marca-arriba {
+    left: 50%;
+    top: 7px;
+    transform: translateX(-50%);
+}
+
+#mano-marca-izquierda {
+    left: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#mano-marca-derecha {
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+}
 
 
-/* Aclaración del cuadro de puntos extra */
+/* =============================================
+   ACLARACIÓN DEL CUADRO DE PUNTOS EXTRA
+   ============================================= */
+
 .puntos-extras-ayuda {
     margin: 4px 0 10px;
     color: #e7e6d8;
     font-size: 11px;
     line-height: 1.35;
 }
+
 .puntos-extras-jugador {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
 }
+
 
 /* =========================================
    PUNTOS EXTRA JUNTO A CADA JUGADOR
@@ -1141,6 +1263,8 @@ footer {
         transform: rotate(90deg);
         transform-origin: center center;
     }
+}
+}
 
 
 /* Ajuste final de las manos laterales en móvil */
@@ -1173,124 +1297,48 @@ footer {
 
 
 /* =============================================
-   CORRECCIÓN FINAL: TAMAÑO UNIFORME DE LAS CARTAS
+   TAMAÑO UNIFICADO DE CARTAS Y MAZOS
    ============================================= */
-
-/* Cartas y huecos de reparto de los cuatro jugadores */
-.table .hand > .card,
-.table .hand > .card-slot {
-    flex: 0 0 60px !important;
-    width: 60px !important;
-    min-width: 60px;
-    max-width: 60px;
-    aspect-ratio: 207 / 319;
-}
-
-/* Las cuatro cartas superiores */
-.partner .hand {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
-}
-
-/* Las cuatro cartas inferiores */
-.you .hand {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
-}
-
-/* Las cuatro cartas laterales */
-.side-player .hand {
-    width: 256px !important;
-    gap: 4px;
-}
-
-.side-player .hand > .card,
-.side-player .hand > .card-slot {
-    flex: 0 0 60px !important;
-    width: 60px !important;
-    min-width: 60px;
-    max-width: 60px;
-}
-
-/* Huecos ficticios de los mazos: mismo tamaño */
-.table .mazo-slot {
-    width: 60px !important;
-    height: calc(60px * (319 / 207)) !important;
-    box-sizing: border-box;
-}
-
-/* Mazo visible durante el reparto */
-.table .mazo-fijo {
-    width: 60px;
-    height: calc(60px * (319 / 207));
-}
-
-
-/* =============================================
-   CORRECCIÓN DE PROPORCIONES DE LAS CARTAS
-   ============================================= */
-
-/* Cartas verticales: proporción correcta */
-.table .hand > .card,
-.table .hand > .card-slot {
-    box-sizing: border-box;
-    flex: 0 0 60px !important;
-    width: 60px !important;
-    min-width: 60px;
-    max-width: 60px;
-    height: calc(60px * (319 / 207)) !important;
-    aspect-ratio: 207 / 319;
-}
-
-/* Mano superior e inferior */
-.partner .hand > .card,
-.partner .hand > .card-slot,
-.you .hand > .card,
-.you .hand > .card-slot {
-    flex: 0 0 60px !important;
-    width: 60px !important;
-    height: calc(60px * (319 / 207)) !important;
-}
-
-/* Manos laterales: las cartas se giran, no se deforman */
-.side-player .hand > .card,
-.side-player .hand > .card-slot {
-    flex: 0 0 60px !important;
-    width: 60px !important;
-    height: calc(60px * (319 / 207)) !important;
-}
-
-/* Evitar que las imágenes se estiren dentro de las cartas */
-.table .card img,
-.table .card-slot img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-/* Huecos ficticios con la misma proporción */
-.table .mazo-slot,
-.table .mazo-fijo {
-    width: 60px !important;
-    height: calc(60px * (319 / 207)) !important;
-    box-sizing: border-box;
-}
 
 @media (max-width: 700px) {
+
+    /* Cartas de los cuatro jugadores */
     .table .hand > .card,
-    .table .hand > .card-slot,
+    .table .hand > .card-slot {
+        box-sizing: border-box;
+        flex: 0 0 60px !important;
+        width: 60px !important;
+        min-width: 60px !important;
+        max-width: 60px !important;
+        height: calc(60px * (319 / 207)) !important;
+        aspect-ratio: 207 / 319;
+    }
+
+    /* Separación entre cartas */
+    .table .hand {
+        gap: 3px;
+    }
+
+    /* Cartas de los jugadores laterales */
+    .side-player .hand {
+        width: 256px !important;
+    }
+
+    /* Mazos y huecos de reparto */
     .table .mazo-slot,
     .table .mazo-fijo {
+        box-sizing: border-box;
         width: 60px !important;
+        min-width: 60px !important;
         height: calc(60px * (319 / 207)) !important;
+    }
+
+    /* Imagen dentro de cada carta */
+    .table .card img,
+    .table .card-slot img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
 }
 /* =============================================
@@ -1435,4 +1483,88 @@ footer {
     color: var(--gold);
     opacity: 1;
     margin-top: 5px; /* Ajuste para acercarlo */
+}
+
+/* =============================================
+   AJUSTE PROGRESIVO DEL TABLERO EN MÓVIL
+   ============================================= */
+
+@media (max-width: 700px) {
+
+    .table {
+        height: 450px;
+        min-height: 450px;
+    }
+
+    .center-message {
+        width: 52%;
+        height: 38%;
+    }
+
+}
+
+/* =============================================
+   19. PANEL DINÁMICO DE CONTROLES
+   ============================================= */
+
+/* Si el panel está oculto, no ocupa espacio */
+#controls-panel[hidden] {
+    display: none !important;
+}
+
+/* =============================================
+   AJUSTES PARA MÓVIL
+   ============================================= */
+
+@media (max-width: 700px) {
+
+    /* Panel compacto debajo del tablero */
+    #controls-panel {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 8px 0 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    /* Botones más compactos */
+    #controls-panel button {
+        padding: 10px 12px;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    /* Cuando hay botones, el tablero deja espacio para ellos */
+    .game:has(#controls-panel:not([hidden])) .table {
+        height: clamp(360px, calc(100dvh - 300px), 620px);
+        min-height: 360px;
+    }
+
+    /* Cuando no hay botones, el tablero recupera espacio */
+    .game:not(:has(#controls-panel:not([hidden]))) .table {
+        height: clamp(400px, calc(100dvh - 220px), 680px);
+        min-height: 400px;
+    }
+}
+
+/* =============================================
+   20. OCULTAR ELEMENTOS TEMPORALMENTE
+   ============================================= */
+
+/* Eliminar el pie de página */
+footer {
+    display: none !important;
+}
+
+/* Ocultar el botón Historial, conservando su código */
+#historial-partida-btn {
+    display: none !important;
+}
+
+/* Mantener también oculto el panel del historial */
+#historial-partida-panel {
+    display: none !important;
 }
