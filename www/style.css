@@ -204,12 +204,12 @@ body {
 }
 
 .side-player.left {
-    left: 36px;
+    left: 106px;
     right: auto;
 }
 
 .side-player.right {
-    right: 36px;
+    right: 106px;
     left: auto;
 }
 
@@ -1259,11 +1259,17 @@ footer {
    19. PANEL DINÁMICO DE CONTROLES
    ============================================= */
 
-/* Si el panel está oculto, no ocupa espacio */
-#controls-panel[hidden] {
-    display: none !important;
-}
+/* =============================================
+   19. PANEL DINÁMICO DE CONTROLES
+   ============================================= */
 
+/* El panel ocupa siempre su hueco (aunque esté oculto)
+   para que el tablero no cambie de tamaño. */
+#controls-panel[hidden] {
+    display: flex !important;
+    visibility: hidden;
+    pointer-events: none;
+}
 /* =============================================
    AJUSTES PARA MÓVIL
    ============================================= */
@@ -1289,16 +1295,22 @@ footer {
     }
 
     /* Cuando hay botones, el tablero deja espacio para ellos */
-    .game:has(#controls-panel:not([hidden])) .table {
-        height: clamp(360px, calc(100dvh - 300px), 620px);
-        min-height: 360px;
+    
+/* =============================================
+   TAMAÑO FIJO DEL TABLERO EN MÓVIL
+   El tablero conserva siempre la misma altura,
+   haya botones visibles o no.
+   ============================================= */
+
+@media (max-width: 700px) {
+
+    .game:has(#controls-panel) .table {
+        height: clamp(360px, calc(100dvh - 300px), 620px) !important;
+        min-height: 360px !important;
     }
 
-    /* Cuando no hay botones, el tablero recupera espacio */
-    .game:not(:has(#controls-panel:not([hidden]))) .table {
-        height: clamp(400px, calc(100dvh - 220px), 680px);
-        min-height: 400px;
-    }
+}
+
 }
 
 /* =============================================
