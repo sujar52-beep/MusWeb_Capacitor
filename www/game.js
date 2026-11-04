@@ -505,6 +505,7 @@ function mostrarCartas(contenedorId, cartas, ocultas = false) {
         contenedor.append(crearCartaVisual(carta, ocultas));
     }
 }
+
 function renderizarMesa() {
     mostrarCartas("player-hand",  jugadores[0].cartas);
     mostrarCartas("right-hand",   jugadores[1].cartas, true);
@@ -745,6 +746,7 @@ async function animarRepartoDeNuevasCartas(cartasPorJugador) {
     // La visualización se hará en renderizarMesa()
     jugadores[0].cartas.sort((a, b) => REGLAS.ordenGrande.indexOf(b.valor) - REGLAS.ordenGrande.indexOf(a.valor));
 }
+
 async function ejecutarDescarte() {
     if (fase !== "descarte") return;
 
@@ -866,6 +868,7 @@ function limpiarBocadillos() {
     // Ahora vuelven a vivir dentro de .player
     document.querySelectorAll('.player .bocadillo').forEach(boca => boca.remove());
 }
+
 function registrar(mensaje) {
     const ahora = new Date();
     const hora = ahora.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -1382,6 +1385,7 @@ function procesarTurnoDeclaracion() {
         declarar(turnoDeclaracion, tiene);
     }, 900);
 }
+
 function jugadorTiene(idJugador) {
     const jugador = jugadores[idJugador];
     if (fase === "declararPares") return analizarPares(jugador).tipo > 0;
@@ -1810,6 +1814,7 @@ function pesoPares(valor) {
     // Para el resto (4,5,6,7,10,11), el peso es su valor real (4 al 11)
     return valor;
 }
+
 function puntosCartaJuego(carta) {
     if (carta.valor === 1 || carta.valor === 2) return 1;
     if ([3, 10, 11, 12].includes(carta.valor)) return 10;
@@ -2196,51 +2201,142 @@ function reenvidar(cantidad) {
 
 function responderEnviteRival() {
     if (!envite.activo || envite.respondiente !== 1) return;
-    
-    const rivales = [jugadores[1], jugadores[3]];
-    const algunoQuiere = rivales.some(j => !iaQuiereMus(j));
-    const manoFuerte   = rivales.every(j => !iaQuiereMus(j));
 
-    // Buscamos cuál de los dos rivales es el que está decidiendo (el que tiene la jugada)
-    const rivalQueDecide = rivales.find(r => puedeEnvidarEnLance(1, lanceActual)) || jugadores[1];
+    const lance = envite.lance;
+
+    // Elegimos al jugador rival con la mejor mano habilitada.
+    const rivalQueDecide =
+        mejorJugadorEquipoEnviteIA(1, lance) || jugadores[1];
+
     const idBocadillo = rivalQueDecide.id;
 
-    if (manoFuerte && envite.base + envite.pendiente < 12) {
-        envite.base += envite.pendiente; envite.pendiente = 2; envite.ultimoEnvidante = 1; envite.respondiente = 0;
-        
-        mostrarBocadillo(idBocadillo, "¡Reenvido!", "rojo"); // <-- BOCADILLO
-        
-        $("bet-title").textContent = "Reenvite del rival"; $("message").textContent = "¡El rival reenvía!";
-        $("phase").textContent = `Aceptan ${envite.base} y suben 2`; registrar(`El rival reenvida 2 piedras. Base: ${envite.base}.`);
-        dibujarApuesta(); actualizarMarcaEnJuego(); actualizarBotones(); return;
+    const importeActual = envite.base + envite.pendiente;
+
+    const decision = decidirRespuestaEnviteIA(
+        1,
+        lance,
+        importeActual,
+        importeActual < 12
+    );
+
+    // ==========================================
+    // EL RIVAL REENVIDA
+    // ==========================================
+
+    if (decision === "reenvido" && importeActual < 12) {
+
+        envite.base += envite.pendiente;
+        envite.pendiente = 2;
+
+        envite.ultimoEnvidante = 1;
+        envite.respondiente = 0;
+
+        mostrarBocadillo(idBocadillo, "¡Reenvido!", "rojo");
+
+        $("bet-title").textContent = "Reenvite del rival";
+        $("message").textContent = "¡El rival reenvía!";
+
+        $("phase").textContent =
+            `Aceptan ${envite.base} y suben 2`;
+
+        registrar(
+            `El rival reenvida 2 piedras. Base: ${envite.base}.`
+        );
+
+        dibujarApuesta();
+        actualizarMarcaEnJuego();
+        actualizarBotones();
+
+        return;
     }
 
-    if (algunoQuiere) {
-        envite.base += envite.pendiente; envite.pendiente = 0;
-        envitesPendientes.push({ lance: envite.lance, equipo: envite.ultimoEnvidante, importe: envite.base });
-        lancesCerradosPorEnvite.push(envite.lance);
-        
-        mostrarBocadillo(idBocadillo, "Quiero", "verde"); // <-- BOCADILLO
-        
-        $("message").textContent = "El rival quiere"; $("phase").textContent = `Envite aceptado: ${envite.base} piedras en juego`;
-        registrar(`El rival quiere. En juego: ${envite.base} piedras.`);
-        envite = { activo: false, lance: null, ultimoEnvidante: null, respondiente: null, base: 0, pendiente: 0 };
-        dibujarApuesta(); actualizarMarcaEnJuego(); actualizarBotones(); setTimeout(() => siguienteLance(), 1000); return;
+    // ==========================================
+    // EL RIVAL ACEPTA
+    // ==========================================
+
+    if (decision === "quiero") {
+
+        envite.base += envite.pendiente;
+        envite.pendiente = 0;
+
+        envitesPendientes.push({
+            lance: lance,
+            equipo: envite.ultimoEnvidante,
+            importe: envite.base
+        });
+
+        lancesCerradosPorEnvite.push(lance);
+
+        mostrarBocadillo(idBocadillo, "Quiero", "verde");
+
+        $("message").textContent = "El rival quiere";
+
+        $("phase").textContent =
+            `Envite aceptado: ${envite.base} piedras en juego`;
+
+        registrar(
+            `El rival quiere. En juego: ${envite.base} piedras.`
+        );
+
+        envite = {
+            activo: false,
+            lance: null,
+            ultimoEnvidante: null,
+            respondiente: null,
+            base: 0,
+            pendiente: 0
+        };
+
+        dibujarApuesta();
+        actualizarMarcaEnJuego();
+        actualizarBotones();
+
+        setTimeout(() => siguienteLance(), 1000);
+
+        return;
     }
 
-    // Si rechazan una subida, el último envidante cobra lo que ya estaba aceptado;
-    // si rechazan el primer envite, cobra el deje de 1 piedra.
+    // ==========================================
+    // EL RIVAL RECHAZA
+    // ==========================================
+
     const gananciaRival = envite.base > 0 ? envite.base : 1;
-    const equipoGanadorEnvite = envite.ultimoEnvidante === 0 ? "nosotros" : "ellos";
-    tantosMano[envite.lance][equipoGanadorEnvite] += gananciaRival;
-    lancesCerradosPorEnvite.push(envite.lance);
-    
-    mostrarBocadillo(idBocadillo, "No quiero", "rojo"); // <-- BOCADILLO
-    
-    $("message").textContent = "El rival no quiere"; $("phase").textContent = `Ganas ${gananciaRival} piedras`; registrar(`El rival no quiere. Ganas ${gananciaRival} piedras.`);
-    envite = { activo: false, lance: null, ultimoEnvidante: null, respondiente: null, base: 0, pendiente: 0 };
-    actualizarMarcador(); dibujarApuesta(); actualizarMarcaEnJuego(); actualizarBotones(); setTimeout(() => siguienteLance(), 1200);
+
+    const equipoGanadorEnvite =
+        envite.ultimoEnvidante === 0 ? "nosotros" : "ellos";
+
+    tantosMano[lance][equipoGanadorEnvite] += gananciaRival;
+
+    lancesCerradosPorEnvite.push(lance);
+
+    mostrarBocadillo(idBocadillo, "No quiero", "rojo");
+
+    $("message").textContent = "El rival no quiere";
+
+    $("phase").textContent =
+        `Ganas ${gananciaRival} piedras`;
+
+    registrar(
+        `El rival no quiere. Ganas ${gananciaRival} piedras.`
+    );
+
+    envite = {
+        activo: false,
+        lance: null,
+        ultimoEnvidante: null,
+        respondiente: null,
+        base: 0,
+        pendiente: 0
+    };
+
+    actualizarMarcador();
+    dibujarApuesta();
+    actualizarMarcaEnJuego();
+    actualizarBotones();
+
+    setTimeout(() => siguienteLance(), 1200);
 }
+
 function responderEnvite(aceptado) {
     if (!envite.activo || envite.respondiente !== 0) return;
 
@@ -2360,6 +2456,105 @@ function debeEnvidarIA(jugador, lance) {
     return false;
 }
 
+// ======================================================
+// VALORACIÓN CONJUNTA DEL EQUIPO PARA LOS ENVITES
+// ======================================================
+
+function umbralBaseEnviteIA(lance) {
+    if (lance === "grande") return 30;
+    if (lance === "chica") return 70;
+    if (lance === "pares") return 10;
+    if (lance === "juego" && hayJuegoEnMesa()) return 31;
+    if (lance === "juego") return 30;
+
+    return Infinity;
+}
+
+
+// Devuelve el jugador con la mejor mano de su equipo
+// entre los que pueden participar en ese lance.
+
+function mejorJugadorEquipoEnviteIA(equipo, lance) {
+    if (!jugadores || !jugadores.length) return null;
+
+    const candidatos = jugadores.filter(j =>
+        j.equipo === equipo && jugadorPuedeIntervenir(j, lance)
+    );
+
+    if (!candidatos.length) return null;
+
+    return candidatos.reduce((mejor, actual) => {
+        return fuerzaEnviteIA(actual, lance) >
+               fuerzaEnviteIA(mejor, lance)
+            ? actual
+            : mejor;
+    });
+}
+
+
+// Decide si un equipo debe iniciar un envite.
+
+function debeEnvidarEquipoIA(equipo, lance) {
+    const mejor = mejorJugadorEquipoEnviteIA(equipo, lance);
+
+    if (!mejor) return false;
+
+    return fuerzaEnviteIA(mejor, lance) >=
+           umbralBaseEnviteIA(lance);
+}
+
+
+// Incremento de fuerza necesario para reenvidar.
+// Cuanto más elevado sea el importe, más exigente será la IA.
+
+function incrementoReenvidoIA(lance) {
+    const incrementos = {
+        grande: 8,
+        chica: 15,
+        pares: 8,
+        juego: 3
+    };
+
+    return incrementos[lance] || 5;
+}
+
+
+// Decide cómo responder a un envite:
+// "quiero", "noquiero" o "reenvido".
+
+function decidirRespuestaEnviteIA(
+    equipo,
+    lance,
+    importeActual = 2,
+    puedeReenvidar = true
+) {
+    const mejor = mejorJugadorEquipoEnviteIA(equipo, lance);
+
+    if (!mejor) return "noquiero";
+
+    const fuerza = fuerzaEnviteIA(mejor, lance);
+    const umbral = umbralBaseEnviteIA(lance);
+
+    // No hay fuerza suficiente para aceptar.
+    if (fuerza < umbral) return "noquiero";
+
+    // Si solo estamos aconsejando, no proponemos una subida.
+    if (!puedeReenvidar) return "quiero";
+
+    const incremento = incrementoReenvidoIA(lance);
+
+    const penalizacion = Math.max(0, importeActual - 2)
+        * (incremento / 4);
+
+    const umbralReenvido = umbral + incremento + penalizacion;
+
+    if (fuerza >= umbralReenvido) {
+        return "reenvido";
+    }
+
+    return "quiero";
+}
+
 function avanzarTurnoEnvite() {
     if (envite.activo) return;
 
@@ -2408,17 +2603,24 @@ function intentarEnviteIA() {
     if (turnoEnviteId === null || turnoEnviteId === 0) return;
 
     const jugador = jugadores[turnoEnviteId];
+
     if (!jugador || jugador.humano) return;
 
-    let tieneJugada = true;
-    if (lanceActual === "pares") tieneJugada = analizarPares(jugador).tipo > 0;
-    if (lanceActual === "juego" && hayJuegoEnMesa()) tieneJugada = analizarJuego(jugador).tieneJuego;
+    const tieneJugada = jugadorPuedeIntervenir(jugador, lanceActual);
 
-    let rivalPuede = true;
-    if (lanceActual === "pares") rivalPuede = jugadores.filter(j => j.equipo !== jugador.equipo).some(j => analizarPares(j).tipo > 0);
-    if (lanceActual === "juego" && hayJuegoEnMesa()) rivalPuede = jugadores.filter(j => j.equipo !== jugador.equipo).some(j => analizarJuego(j).tieneJuego);
+    const equipoContrario = jugador.equipo === 0 ? 1 : 0;
 
-    if (!tieneJugada || !rivalPuede || !debeEnvidarIA(jugador, lanceActual)) {
+    const rivalPuede = puedeEnvidarEnLance(
+        equipoContrario,
+        lanceActual
+    );
+
+    const equipoQuiereEnvidar = debeEnvidarEquipoIA(
+        jugador.equipo,
+        lanceActual
+    );
+
+    if (!tieneJugada || !rivalPuede || !equipoQuiereEnvidar) {
         mostrarBocadillo(jugador.id, "Paso", "normal");
         registrar(`${jugador.nombre} pasa.`);
         avanzarTurnoEnvite();
@@ -2426,42 +2628,98 @@ function intentarEnviteIA() {
     }
 
     mostrarBocadillo(jugador.id, "¡Envido!", "rojo");
+
     pasesConsecutivos = 0;
-    envite = { activo: true, lance: lanceActual, ultimoEnvidante: jugador.equipo, respondiente: jugador.equipo === 0 ? 1 : 0, base: 0, pendiente: 2 };
-    $("bet-title").textContent = `Envite de ${jugador.nombre} · ${lanceActual.toUpperCase()}`;
+
+    envite = {
+        activo: true,
+        lance: lanceActual,
+        ultimoEnvidante: jugador.equipo,
+        respondiente: jugador.equipo === 0 ? 1 : 0,
+        base: 0,
+        pendiente: 2
+    };
+
+    $("bet-title").textContent =
+        `Envite de ${jugador.nombre} · ${lanceActual.toUpperCase()}`;
+
     $("message").textContent = "¡Hay envite!";
     $("phase").textContent = "2 piedras pendientes de respuesta";
+
     registrar(`${jugador.nombre} envida 2 piedras.`);
-    dibujarApuesta(); actualizarMarcaEnJuego(); actualizarBotones();
+
+    dibujarApuesta();
+    actualizarMarcaEnJuego();
+    actualizarBotones();
 
     if (jugador.equipo === 0) {
+
         setTimeout(() => responderEnviteRival(), 1000);
+
     } else {
-        const yoTengo = lanceActual === "pares" ? analizarPares(jugadores[0]).tipo > 0 : lanceActual === "juego" && hayJuegoEnMesa() ? analizarJuego(jugadores[0]).tieneJuego : true;
-        const companeroTiene = lanceActual === "pares" ? analizarPares(jugadores[2]).tipo > 0 : lanceActual === "juego" && hayJuegoEnMesa() ? analizarJuego(jugadores[2]).tieneJuego : true;
-        if (!yoTengo && companeroTiene) setTimeout(() => procesarRespuestaCompanero(), 1200);
+
+        const yoTengo = jugadorPuedeIntervenir(
+            jugadores[0],
+            lanceActual
+        );
+
+        const companeroTiene = jugadorPuedeIntervenir(
+            jugadores[2],
+            lanceActual
+        );
+
+        if (!yoTengo && companeroTiene) {
+            setTimeout(() => procesarRespuestaCompanero(), 1200);
+        }
     }
 }
 
 function procesarRespuestaCompanero() {
     if (!envite.activo || envite.respondiente !== 0) return;
 
-    $("phase").textContent = "Tu compañero está valorando el envite...";
+    $("phase").textContent =
+        "Tu compañero está valorando el envite...";
+
     actualizarBotones();
 
     setTimeout(() => {
+
         if (!envite.activo || envite.respondiente !== 0) return;
-        const companeroQuiere = !iaQuiereMus(jugadores[2]);
+
+        const importeActual = envite.base + envite.pendiente;
+
+        const decisionIA = decidirRespuestaEnviteIA(
+            0,
+            envite.lance,
+            importeActual,
+            false
+        );
+
+        const companeroQuiere = decisionIA === "quiero";
+
         const decision = companeroQuiere ? "Quiero" : "No quiero";
-        mostrarBocadillo(2, decision, companeroQuiere ? "verde" : "rojo");
-        $("message").textContent = `Tu compañero dice «${decision}»`;
+
+        mostrarBocadillo(
+            2,
+            decision,
+            companeroQuiere ? "verde" : "rojo"
+        );
+
+        $("message").textContent =
+            `Tu compañero dice «${decision}»`;
+
         $("phase").textContent = companeroQuiere
             ? "Tu compañero quiere; ahora decides tú."
             : "Tu compañero no quiere; puedes decidir tú. Si rechazas, se cerrará el envite.";
-        registrar(`Tu compañero opina: ${decision}. La decisión final queda en tus manos.`);
-        // No cerramos el envite aquí: el jugador humano puede aceptar, rechazar
-        // o reenvidar con sus propias cartas en cuenta.
+
+        registrar(
+            `Tu compañero opina: ${decision}. La decisión final queda en tus manos.`
+        );
+
+        // No se cierra el envite: tú conservas la decisión final.
+
         actualizarBotones();
+
     }, 900);
 }
 // =============================================
