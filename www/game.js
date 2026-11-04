@@ -72,7 +72,7 @@ let lanceActual = "grande";
 let turnoEnviteId = null;
 let turnoMusId = null; // Jugador al que le toca decidir si quiere mus.
 let pasesConsecutivos = 0;
-let respuestaIAEnCurso = false;
+/* let respuestaIAEnCurso = false;*/
 let tantosMano = {
     grande: { nosotros: 0, ellos: 0 },
     chica:  { nosotros: 0, ellos: 0 },
@@ -293,6 +293,9 @@ function ocultarCartaSorteo() {
 async function nuevaMano() {
     limpiarBocadillos();
     if (repartiendo) return;
+    const descarteInicio = $("descarte-central");
+    if (descarteInicio) { descarteInicio.classList.add("hidden"); descarteInicio.replaceChildren(); }
+    montonDeDescartes = [];
 
         // Limpiar puntos extra
     const betArea = $("bet-area");
@@ -354,9 +357,7 @@ async function nuevaMano() {
             $("mus-text-overlay")?.classList.add("visible");
             
             sorteoInicializado = true;     
-                        
-                    
-                
+                                        
             } else {
                 repartidorId = (repartidorId + 1) % jugadores.length;
             }
@@ -504,7 +505,6 @@ function mostrarCartas(contenedorId, cartas, ocultas = false) {
         contenedor.append(crearCartaVisual(carta, ocultas));
     }
 }
-
 function renderizarMesa() {
     mostrarCartas("player-hand",  jugadores[0].cartas);
     mostrarCartas("right-hand",   jugadores[1].cartas, true);
@@ -519,11 +519,14 @@ function renderizarMesa() {
     actualizarMarcaEnJuego();
 }
 
+
+// ▼▼▼ NUEVA colocarMazoAIRepartidor(): usa el hueco ficticio como ancla ▼▼▼
 function colocarMazoAIRepartidor() {
     const mazo = $("mazo-fijo");
     const mesa = document.querySelector(".table");
     if (!mazo || !mesa) return;
 
+    // Huecos ficticios declarados en index.html
     const slots = {
         0: "mazo-slot-player",   // Tú
         1: "mazo-slot-right",    // Rival derecho
@@ -531,48 +534,39 @@ function colocarMazoAIRepartidor() {
         3: "mazo-slot-left"      // Rival izquierdo
     };
 
-    const slot = $(slots[repartidorId]);
-    if (!slot) return;
-
-    mazo.classList.add("visible");
-
-    const rectMesa = mesa.getBoundingClientRect();
-    const ancho = mazo.offsetWidth || 96;
-    const alto = mazo.offsetHeight || 148;
-
-    // Valores por defecto (para ti y tu compañero)
-    let centroX, centroY;
-
-    // 🔥 AQUÍ CONTROLAS LA POSICIÓN EXACTA DE LOS RIVALES 🔥
-       if (Number(repartidorId) === 3) {
-        // --- RIVAL IZQUIERDO ---
-        // Si has movido las cartas con margin-left: 60px, 
-        // el mazo debe moverse también. Ajusta centroX.
-        centroX = 75;   // Antes era 60. Auméntalo si mueves las cartas a la derecha.
-        centroY = 630;
-    } 
-    else if (Number(repartidorId) === 1) {
-        // --- RIVAL DERECHO ---
-        // Si has movido las cartas con margin-right: 60px,
-        // el mazo debe moverse también. Ajusta centroX.
-        centroX = rectMesa.width -70; // Antes era -60.
-        centroY = 35;
-    } 
-    else {
-        // --- TÚ Y COMPAÑERO (Usan el hueco dinámico) ---
-        const rectSlot = slot.getBoundingClientRect();
-        centroX = rectSlot.left + rectSlot.width / 2 - rectMesa.left;
-        centroY = rectSlot.top + rectSlot.height / 2 - rectMesa.top;
+    const slot = document.getElementById(slots[Number(repartidorId)]);
+    if (!slot) {
+        console.warn("No existe el hueco ficticio para repartidor", repartidorId);
+        return;
     }
 
-    // Rotamos el mazo solo para los rivales laterales
+    // El mazo debe medirse antes de posicionarlo
+    mazo.classList.add("visible");
+    mazo.style.position = "absolute";
     mazo.style.transformOrigin = "center center";
-    mazo.style.transform = (Number(repartidorId) === 3 || Number(repartidorId) === 1) ? "rotate(90deg)" : "none";
 
-    // Aplicamos la posición final
-    mazo.style.left = `${centroX - ancho / 2}px`;
-    mazo.style.top = `${centroY - alto / 2}px`;
+    // Rotación del mazo según el repartidor
+    // (0 = sin rotación, 1 = 90º, 3 = -90º para que quede "de pie" junto al lateral)
+    const rotacion = Number(repartidorId) === 1 ? 90
+                   : Number(repartidorId) === 3 ? -90
+                   : 0;
+    mazo.style.transform = rotacion ? `rotate(${rotacion}deg)` : "none";
+
+    const rectMesa  = mesa.getBoundingClientRect();
+    const rectSlot  = slot.getBoundingClientRect();
+    const anchoMazo = mazo.offsetWidth  || 60;
+    const altoMazo  = mazo.offsetHeight || 92;
+
+    // Centramos el mazo sobre el hueco ficticio
+    const left = rectSlot.left - rectMesa.left + (rectSlot.width  - anchoMazo) / 2;
+    const top  = rectSlot.top  - rectMesa.top  + (rectSlot.height - altoMazo)  / 2;
+
+    mazo.style.left = `${left}px`;
+    mazo.style.top  = `${top}px`;
 }
+// ▲▲▲ FIN NUEVA colocarMazoAIRepartidor() ▲▲▲
+
+
 async function animarReparto() {
     const mazo = $("mazo-fijo");
     if (!mazo) return;
@@ -595,21 +589,22 @@ async function animarReparto() {
         mazo.appendChild(carta);
     }
 
-    // 2. Posicionamos el mazo junto al jugador que reparte.
+       // 2. Posicionamos el mazo junto al jugador que reparte.
     colocarMazoAIRepartidor();
 
-    // Recalcular antes de iniciar las animaciones.
-  await new Promise(resolve => requestAnimationFrame(resolve));
-    colocarMazoAIRepartidor(); // <-- Esto está perfecto, asegúrate de que se mantenga.
+    // Esperar un frame para que el mazo ya tenga tamaño/posición definitivos.
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
     // 3. Orden de reparto
     const ordenReparto = [];
+    
     for (let paso = 1; paso < jugadores.length; paso++) {
         ordenReparto.push((repartidorId + paso) % jugadores.length);
     }
     ordenReparto.push(repartidorId);
 
     // 4. Animación
-    for (let ronda = 0; ronda < REGLAS.cartasPorJugador; ronda++) {
+       for (let ronda = 0; ronda < REGLAS.cartasPorJugador; ronda++) {
         for (const indiceJugador of ordenReparto) {
             const contenedor = $(contenedores[indiceJugador]);
             if (!contenedor) continue;
@@ -620,13 +615,17 @@ async function animarReparto() {
             const rectDestino = hueco.getBoundingClientRect();
             const rectMazo = mazo.getBoundingClientRect();
 
+            // Centro del mazo (útil si el mazo está rotado en laterales)
+            const origenX = rectMazo.left + rectMazo.width  / 2 - rectDestino.width  / 2;
+            const origenY = rectMazo.top  + rectMazo.height / 2 - rectDestino.height / 2;
+
             const cartaVoladora = document.createElement("div");
             cartaVoladora.className = "card back";
 
             Object.assign(cartaVoladora.style, {
                 position: "fixed",
-                left: `${rectMazo.left}px`,
-                top: `${rectMazo.top}px`,
+                left: `${origenX}px`,
+                top: `${origenY}px`,
                 width: `${rectDestino.width}px`,
                 height: `${rectDestino.height}px`,
                 margin: "0",
@@ -766,7 +765,7 @@ async function ejecutarDescarte() {
 
     const descarteCentralEl = $('descarte-central');
     descarteCentralEl.classList.remove('hidden');
-    descarteCentralEl.innerHTML = '';
+    // No vaciar el montón: conserva los descartes de las rondas anteriores de mus.
     await animarDescarteHaciaMonton(descartesPorJugador);
 
     const cartasARepartir = {};
@@ -800,8 +799,7 @@ async function ejecutarDescarte() {
     }
 
     await esperar(300);
-    descarteCentralEl.classList.add('hidden');
-
+    // El montón permanece visible durante las sucesivas rondas de mus.
     await animarRepartoDeNuevasCartas(cartasARepartir);
 
     // Iniciar una nueva ronda de MUS tras reponer las cartas.
@@ -837,29 +835,35 @@ function mostrarBocadillo(idJugador, texto, tipo = "normal") {
     const contenedorCartas = $(contenedores[idJugador]);
     if (!contenedorCartas) return;
 
-    // El bocadillo se cuelga del jugador, no de la mano de cartas girada.
+    // El bocadillo vive DENTRO del .player para que salga pegado a sus cartas.
     const padre = contenedorCartas.closest('.player') || contenedorCartas.parentElement;
     if (!padre) return;
 
+    // Elimina el bocadillo anterior de ESTE mismo jugador
     const anterior = padre.querySelector('.bocadillo');
     if (anterior) anterior.remove();
 
+    const equipo = jugadores[idJugador]?.equipo === 0 ? "nosotros" : "ellos";
     const boca = document.createElement('div');
-    const posicion = { 0: 'bocadillo-abajo', 1: 'bocadillo-derecha', 2: 'bocadillo-arriba', 3: 'bocadillo-izquierda' }[idJugador] || '';
-    boca.className = `bocadillo ${tipo} ${posicion} bocadillo-jugador-${idJugador}`;
-    boca.textContent = texto;
-    
-    padre.appendChild(boca);
-    
-    setTimeout(() => {
-        boca.classList.add('visible');
-    }, 10);
+    const clasePos = {
+        0: 'bocadillo-abajo',
+        1: 'bocadillo-derecha',
+        2: 'bocadillo-arriba',
+        3: 'bocadillo-izquierda'
+    }[idJugador] || '';
 
-    // Los bocadillos permanecen visibles durante todo este lance.
-    // Se limpian juntos cuando comienza el siguiente lance.
+    boca.className = `bocadillo ${tipo} equipo-${equipo} ${clasePos} bocadillo-jugador-${idJugador}`;
+    boca.dataset.jugador = idJugador;
+    boca.textContent = texto;
+
+    padre.appendChild(boca);
+
+    // Animación de entrada
+    requestAnimationFrame(() => boca.classList.add('visible'));
 }
 
 function limpiarBocadillos() {
+    // Ahora vuelven a vivir dentro de .player
     document.querySelectorAll('.player .bocadillo').forEach(boca => boca.remove());
 }
 function registrar(mensaje) {
@@ -888,7 +892,9 @@ function prepararHerramientasPartida() {
         const boton = document.createElement('button');
         boton.id = 'historial-partida-btn';
         boton.type = 'button';
-        boton.textContent = 'Historial de partida';
+        boton.textContent = 'H';
+        boton.setAttribute('aria-label', 'Abrir historial de la partida');
+        boton.title = 'Historial de la partida';
         boton.addEventListener('click', () => {
             const panel = $('historial-partida-panel');
             if (!panel) return;
@@ -896,9 +902,16 @@ function prepararHerramientasPartida() {
             historialAbierto = !panel.hidden;
             if (!panel.hidden) renderizarHistorial();
         });
-        const referencia = $('new-btn');
-        const contenedor = referencia?.parentElement || document.body;
+        const contenedor = $('marcador-movil') || document.body;
         contenedor.appendChild(boton);
+    }
+    const botonHistorial = $('historial-partida-btn');
+    if (botonHistorial) {
+        botonHistorial.textContent = 'H';
+        botonHistorial.setAttribute('aria-label', 'Abrir historial de la partida');
+        botonHistorial.title = 'Historial de la partida';
+        const marcador = $('marcador-movil');
+        if (marcador && botonHistorial.parentElement !== marcador) marcador.appendChild(botonHistorial);
     }
     if (!$('historial-partida-panel')) {
         const panel = document.createElement('section');
@@ -1044,6 +1057,7 @@ function iaQuiereMus(jugador) {
     if (tienePareja || cartasAltas >= 3) return Math.random() < 0.8;
     return Math.random() < REGLAS.probabilidadMus;
 }
+
 function dibujarPuntosJugadores() {
     const betArea = $("bet-area");
     if (!betArea || !jugadores.length) return;
@@ -1059,10 +1073,12 @@ function dibujarPuntosJugadores() {
         const pares = analizarPares(jugador);
         const juego = analizarJuego(jugador);
 
+        // Comprobamos si el EQUIPO del jugador es el ganador (no el jugador individual)
         const ganaPares = ganadorPares && ganadorPares.equipo === jugador.equipo;
-        const ganaJuego = ganadorJuego && ganadorJuego.id === jugador.id; // Para el Punto, solo gana el jugador concreto
+        const ganaJuegoEquipo = ganadorJuego && ganadorJuego.equipo === jugador.equipo;
+        const ganaPunto = ganadorJuego && ganadorJuego.id === jugador.id;
 
-        // Pares
+        // Pares (solo suma si el equipo gana)
         if (ganaPares && pares.tipo) {
             const nombre = pares.nombre === "Pares" ? "Pareja" : pares.nombre;
             lineas.push(`${nombre}: +${pares.puntos}`);
@@ -1070,13 +1086,13 @@ function dibujarPuntosJugadores() {
 
         // Juego o Punto
         if (hayJuego) {
-            // Si hay juego, solo suma el equipo ganador
-            if (ganadorJuego.equipo === jugador.equipo && juego.tieneJuego) {
+            // Juego: solo suma si el equipo gana
+            if (ganaJuegoEquipo && juego.tieneJuego) {
                 lineas.push(`Juego (${juego.suma}): +${juego.suma === 31 ? 3 : 2}`);
             }
         } else {
-            // Si nadie tiene juego, es Punto. Solo el ganador del Punto suma.
-            if (ganaJuego) {
+            // Punto: solo suma el jugador exacto que gana
+            if (ganaPunto) {
                 lineas.push(`Punto (${juego.suma}): +1`);
             }
         }
@@ -1316,6 +1332,7 @@ function cortarMus() {
 // =============================================
 
 function iniciarDeclaracion(tipo) {
+     limpiarBocadillos(); // 👈 AÑADE ESTO
     fase = tipo === "pares" ? "declararPares" : "declararJuego";
 
     if (tipo === "pares") declaracionesPares = {};
@@ -1345,18 +1362,26 @@ function procesarTurnoDeclaracion() {
 
     const jugador = jugadores[turnoDeclaracion];
 
+    // Si es el turno del humano y NO tiene la jugada (pares o juego),
+    // declaramos "no tengo" automáticamente para que no se quede bloqueado.
     if (jugador.humano) {
-        $("player-status").textContent = "Declara tu jugada";
-        actualizarBotones();
-        return;
+        const tiene = jugadorTiene(turnoDeclaracion);
+        if (!tiene) {
+            setTimeout(() => declarar(turnoDeclaracion, false), 800);
+            return;
+        } else {
+            $("player-status").textContent = "Declara tu jugada";
+            actualizarBotones();
+            return;
+        }
     }
 
+    // IA: declarar tras un pequeño tiempo
     setTimeout(() => {
         const tiene = jugadorTiene(turnoDeclaracion);
         declarar(turnoDeclaracion, tiene);
     }, 900);
 }
-
 function jugadorTiene(idJugador) {
     const jugador = jugadores[idJugador];
     if (fase === "declararPares") return analizarPares(jugador).tipo > 0;
@@ -1524,6 +1549,7 @@ function declararCorteMus(id) {
 }
 
 function comenzarFaseGrande(mensaje, logMsg, lanceInicial = "grande") {
+     limpiarBocadillos(); // 👈 AÑADE ESTO
     fase = "grande";
     lanceActual = lanceInicial;
     turnoEnviteId = manoId;
@@ -1737,36 +1763,53 @@ function valorMus(carta) {
 
 function analizarPares(jugador) {
     const cuenta = {};
+    // Contamos cuántas cartas hay de cada valor "normalizado" para pares
     for (const carta of jugador.cartas) {
         const v = valorMus(carta);
         cuenta[v] = (cuenta[v] || 0) + 1;
     }
+
+    // Creamos los grupos de cartas que suman 2 o más
     const grupos = Object.entries(cuenta)
         .map(([valor, cantidad]) => ({ valor: Number(valor), cantidad }))
         .filter(g => g.cantidad >= 2)
-        .sort((a, b) => b.cantidad - a.cantidad || pesoGrandeValor(b.valor) - pesoGrandeValor(a.valor));
+        // Ordenamos por cantidad (duples > medias > pares) y luego por fuerza del valor
+        .sort((a, b) => {
+            if (b.cantidad !== a.cantidad) return b.cantidad - a.cantidad;
+            return pesoPares(b.valor) - pesoPares(a.valor);
+        });
 
+    // Si no hay ningún grupo de 2 o más, no hay pares
     if (!grupos.length) return { tipo: 0, nombre: "Sin pares", puntos: 0, clave: [] };
-    // Cuatro cartas del mismo valor también son duples en el mus.
+
+    // Si hay dos grupos distintos, o un grupo de 4 cartas iguales, son DUPLES
     if (grupos.length >= 2 || grupos[0].cantidad === 4) {
         const valores = grupos.slice(0, 2)
-            .map(g => pesoGrandeValor(g.valor))
+            .map(g => pesoPares(g.valor))
             .sort((a, b) => b - a);
         return { tipo: 3, nombre: "Duples", puntos: 3, clave: [3, ...valores] };
     }
+
     const g = grupos[0];
+    // Si el grupo tiene exactamente 3 cartas, son MEDIAS
     if (g.cantidad === 3) {
-        return { tipo: 2, nombre: "Medias", puntos: 2, clave: [2, pesoGrandeValor(g.valor)] };
+        return { tipo: 2, nombre: "Medias", puntos: 2, clave: [2, pesoPares(g.valor)] };
     }
-    return { tipo: 1, nombre: "Pares", puntos: 1, clave: [1, pesoGrandeValor(g.valor)] };
+    
+    // Si el grupo tiene exactamente 2 cartas, son PARES
+    return { tipo: 1, nombre: "Pares", puntos: 1, clave: [1, pesoPares(g.valor)] };
 }
 
-function pesoGrandeValor(valor) {
-    const normalizado = valor === 12 ? 3 : valor === 1 ? 2 : valor;
-    // Un peso mayor significa una carta más alta en la comparación de pares.
-    return 9 - REGLAS.ordenGrande.indexOf(normalizado);
+// Nueva función para calcular el peso de un valor en la comparación de pares.
+// En el Mus: 3 y 12 son los más altos; 1 y 2 los más bajos. El resto en medio.
+function pesoPares(valor) {
+    // Si es 3 o 12, es el valor más alto (peso 10)
+    if (valor === 3 || valor === 12) return 10;
+    // Si es 1 o 2, es el valor más bajo (peso 1)
+    if (valor === 1 || valor === 2) return 1;
+    // Para el resto (4,5,6,7,10,11), el peso es su valor real (4 al 11)
+    return valor;
 }
-
 function puntosCartaJuego(carta) {
     if (carta.valor === 1 || carta.valor === 2) return 1;
     if ([3, 10, 11, 12].includes(carta.valor)) return 10;
@@ -1893,12 +1936,15 @@ function obtenerGanadorLance(lance) {
 
 function resolverTantosBaseDeLance(lance) {
     const ganador = obtenerGanadorLance(lance);
+    if (!ganador) return { ganador: null, texto: `Nadie gana ${lance}.` };
+
+    const equipoGanadorKey = ganador.equipo === 0 ? "nosotros" : "ellos";
+    let puntosGanador = 0;
 
     if (lance === "pares") {
         if (!hayParesEnMesa()) return { ganador: null, texto: "PARES: nadie tiene pares; 0 tantos." };
-        const equipoGanadorKey = ganador.equipo === 0 ? "nosotros" : "ellos";
-        let puntosGanador = 0;
-
+        
+        // SOLO suma el equipo ganador. El rival se queda a 0.
         for (const jugador of jugadores) {
             const pares = analizarPares(jugador);
             if (pares.tipo && jugador.equipo === ganador.equipo) {
@@ -1906,16 +1952,13 @@ function resolverTantosBaseDeLance(lance) {
                 puntosGanador += pares.puntos;
             }
         }
-
         tantosMano.pares[equipoGanadorKey] += puntosGanador;
         return { ganador: ganador.nombre, texto: `PARES: gana ${ganador.nombre}. Su equipo suma ${puntosGanador} tantos.` };
     }
 
     if (lance === "juego") {
-        const equipoGanadorKey = ganador.equipo === 0 ? "nosotros" : "ellos";
-
         if (hayJuegoEnMesa()) {
-            let puntosGanador = 0;
+            // SOLO suma el equipo ganador.
             for (const jugador of jugadores) {
                 const juego = analizarJuego(jugador);
                 if (juego.tieneJuego && jugador.equipo === ganador.equipo) {
@@ -1927,8 +1970,7 @@ function resolverTantosBaseDeLance(lance) {
             tantosMano.juego[equipoGanadorKey] += puntosGanador;
             return { ganador: ganador.nombre, texto: `JUEGO: gana ${ganador.nombre}. Su equipo suma ${puntosGanador} tantos.` };
         } else {
-            // Nadie tiene juego: se juega al PUNTO (30 hacia abajo).
-            // El ganador ya se ha calculado arriba (el que tiene la suma más alta).
+            // Es PUNTO. Solo el jugador ganador (con la suma más alta) suma 1.
             tantosMano.juego[equipoGanadorKey] += 1;
             const sumaGanador = analizarJuego(ganador).suma;
             registrar(`Punto: gana ${ganador.nombre} con ${sumaGanador}. (+1 piedra).`);
@@ -1936,6 +1978,7 @@ function resolverTantosBaseDeLance(lance) {
         }
     }
 
+    // Grande y Chica
     return asignarTantosBase(lance, ganador.equipo, ganador.nombre);
 }
 function asignarTantosBase(lance, equipo, nombre) {
@@ -2322,6 +2365,7 @@ function avanzarTurnoEnvite() {
 
     pasesConsecutivos++;
 
+    // Si todos han pasado, se cierra el lance
     if (pasesConsecutivos >= jugadores.length) {
         registrar("Todos han pasado. Se cierra el lance.");
         $("phase").textContent = "Nadie ha envidiado. Siguiente lance...";
@@ -2332,36 +2376,29 @@ function avanzarTurnoEnvite() {
 
     turnoEnviteId = (turnoEnviteId + 1) % jugadores.length;
 
-    // Si te toca a ti y no tienes la jugada, no debes intervenir.
-    if (
-        turnoEnviteId === 0 &&
-        !jugadorPuedeIntervenir(jugadores[0], lanceActual)
-    ) {
-        registrar(`No intervienes en ${lanceActual}: no tienes la jugada.`);
+    const jugadorTurno = jugadores[turnoEnviteId];
 
-        // Pasamos al siguiente jugador sin pedirte que pulses "Pasar".
-        turnoEnviteId = (turnoEnviteId + 1) % jugadores.length;
-
-        actualizarBotones();
-        $("phase").textContent =
-            `No tienes ${lanceActual}; continúa ${jugadores[turnoEnviteId].nombre}.`;
-
-        if (turnoEnviteId !== 0) {
-            setTimeout(() => intentarEnviteIA(), 500);
+    // Si el jugador del turno NO puede intervenir (no tiene la jugada), lo saltamos
+    if (!jugadorPuedeIntervenir(jugadorTurno, lanceActual)) {
+        registrar(`No interviene ${jugadorTurno.nombre} en ${lanceActual}: no tiene la jugada.`);
+        
+        // Si es humano, actualizamos la UI
+        if (turnoEnviteId === 0) {
+            actualizarBotones();
+            $("phase").textContent = `No tienes ${lanceActual}. Pasando...`;
         }
 
+        // Saltamos al siguiente jugador recursivamente (con un pequeño delay para no bloquear)
+        setTimeout(() => avanzarTurnoEnvite(), 300);
         return;
     }
 
     actualizarBotones();
 
     if (turnoEnviteId === 0) {
-        $("phase").textContent =
-            `Tu turno (${lanceActual}). Puedes envidar o pasar.`;
+        $("phase").textContent = `Tu turno (${lanceActual}). Puedes envidar o pasar.`;
     } else {
-        $("phase").textContent =
-            `Turno de ${jugadores[turnoEnviteId].nombre}...`;
-
+        $("phase").textContent = `Turno de ${jugadorTurno.nombre}...`;
         setTimeout(() => intentarEnviteIA(), 1000);
     }
 }
@@ -2501,7 +2538,8 @@ function siguienteLance() {
 async function finalizarMano() {
     if (repartiendo) return;
     repartiendo = true;
-    actualizarBotones();
+     limpiarBocadillos(); // 👈 AÑADE ESTO
+     actualizarBotones();
 
     try {
         await revelarTodasLasCartas();
@@ -2585,6 +2623,17 @@ async function finalizarMano() {
         repartiendo = false;
         actualizarBotones();
     }
+            // 5) Comprobar si se ha ganado el JUEGO (mejor de 5 = 3 partidas)
+        if (partidasNosotros >= REGLAS.partidasParaGanarJuego) {
+            registrar("¡¡NOSOTROS GANAMOS EL JUEGO (MEJOR DE 5)!!");
+            $("message").textContent = "¡¡HAS GANADO EL JUEGO!!";
+            $("phase").textContent = "Pulsa «Nueva mano» para reiniciar.";
+            // Aquí podrías desactivar los botones de "Nueva mano" o mostrar un overlay
+        } else if (partidasEllos >= REGLAS.partidasParaGanarJuego) {
+            registrar("¡¡ELLOS GANAN EL JUEGO (MEJOR DE 5)!!");
+            $("message").textContent = "¡¡HAN GANADO ELLOS EL JUEGO!!";
+            $("phase").textContent = "Pulsa «Nueva mano» para reiniciar.";
+        }
 }
 
 async function revelarTodasLasCartas() {
@@ -2616,7 +2665,7 @@ function mostrarAvisoFinMano(titulo, n, e) {
     if (!aviso) return;
     aviso.hidden = true;
     aviso.replaceChildren();
-    return;
+  
 
     aviso.replaceChildren();
 
@@ -2636,40 +2685,6 @@ function mostrarAvisoFinMano(titulo, n, e) {
     aviso.hidden = false;
 
     setTimeout(() => { aviso.hidden = true; }, 4000);
-}
-
-// =============================================
-// 18. MARCA DEL JUGADOR MANO
-// =============================================
-
-function actualizarMarcaMano() {
-    // Indicadores nuevos: se muestran dentro del borde de la caja de apuestas.
-    const ids = {
-        0: "mano-marca-abajo",      // Tú, abajo
-        1: "mano-marca-derecha",    // Rival derecho
-        2: "mano-marca-arriba",     // Compañero, arriba
-        3: "mano-marca-izquierda"   // Rival izquierdo
-    };
-
-    const todos = [
-        "mano-marca-abajo",
-        "mano-marca-arriba",
-        "mano-marca-izquierda",
-        "mano-marca-derecha"
-    ];
-
-    // Ocultar todos antes de mostrar el que corresponda.
-    todos.forEach(id => {
-        const marca = document.getElementById(id);
-        if (marca) marca.hidden = true;
-    });
-
-    const idMarca = ids[Number(manoId)];
-    const marca = idMarca ? document.getElementById(idMarca) : null;
-    if (marca) {
-        marca.hidden = false;
-        marca.setAttribute("aria-label", `Mano: ${jugadores[manoId]?.nombre || "jugador"}`);
-    }
 }
 
 // =============================================
@@ -2694,11 +2709,11 @@ $("declarar-no-btn").addEventListener("click", () => {
 
 
 $("bet-stones-btn").addEventListener("click", () => {
-    registrarEnvite(2, "Envite de dos piedras");
+    registrarEnvite(2, "Envidar 2");
 });
 
 $("bet-amarracos-btn").addEventListener("click", () => {
-    registrarEnvite(5, "Envite de un amarraco");
+    registrarEnvite(5, "Envidar 5");
 });
 
 $("accept-bet-btn").addEventListener("click", () => {

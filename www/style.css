@@ -21,6 +21,9 @@
 body {
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;                                    /* ▲ altura dinámica real */
+    padding-top: env(safe-area-inset-top, 0px);            /* ▲ respeta notch/barra */
+    padding-bottom: env(safe-area-inset-bottom, 0px);      /* ▲ respeta barra inferior */
     background: #17251e;
     color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
@@ -30,16 +33,18 @@ body {
     width: min(1250px, 100%);
     margin: auto;
     padding: 20px;
+    padding-top: calc(20px + env(safe-area-inset-top, 0px)); /* ▲ suma el notch */
+    position: relative; /* 👈 NECESARIO para que el botón H se posicione respecto a esta caja */
+    margin-top: 10px;    /* 👈 Baja todo para que no tape los iconos del móvil */
 }
 
 /* =============================================
    2. MESA
    ============================================= */
-
 .table {
     position: relative;
-    height: min(850px, 90vh);
-    min-height: 750px;
+     height: min(850px, 90vh);   /* ▲ de 850px/90vh a 950px/92vh */
+    min-height: 820px;          /* ▲ de 750px a 820px */
     padding: 20px;
     border: 9px solid var(--wood);
     border-radius: 32px;
@@ -56,6 +61,7 @@ body {
     width: 400px;
     max-width: 60%;
     text-align: center;
+    z-index: 800;   
 }
 
 .side-player {
@@ -66,6 +72,7 @@ body {
     height: 300px;
     transform: translateY(-50%);
     text-align: center;
+    z-index: 800;  
 }
 
 .side-player.right {
@@ -85,6 +92,7 @@ body {
     transform: translateX(-50%);
     width: min(500px, 55%);
     text-align: center;
+    z-index: 800;  
 }
 
 .partner .card,
@@ -192,6 +200,7 @@ body {
     height: 300px;
     transform: translateY(-50%);
     text-align: center;
+    z-index: 800;  
 }
 
 .side-player.left {
@@ -347,12 +356,12 @@ footer {
     justify-content: center;
     flex-grow: 1;
     width: 85%;
-    min-height: 1cqi;
+    min-height: 0.5cqi;
     margin: 5px 0;
-    padding: 12px;
+    padding: 11px;
     box-sizing: border-box;
     background: rgba(5, 45, 29, 0.96);
-    border: 2px solid #d9b66b;
+    border: 1px solid #d9b66b;
     border-radius: 12px;
     color: #fff;
 }
@@ -400,7 +409,7 @@ footer {
     color: #ffffff;
     font-weight: bold;
     font-size: 13px;
-    background: radial-gradient(circle at 30% 25%, #f3cc0a, #f97316 90%);
+    background: radial-gradient(circle at 30% 25%, #f3cc0a, #eecd9c 90%);
     border: 3px dashed #fff1bd;
     box-shadow: 0 2px 8px #0009;
     animation: ficha-aparece 180ms ease-out;
@@ -428,131 +437,6 @@ footer {
 }
 
 /* =============================================
-   15. BOCADILLOS DE TEXTO (Cómic)
-   ============================================= */
-
-.hand {
-    position: relative;
-}
-
-.bocadillo {
-    position: absolute;
-    background-color: #ffffff !important; 
-    color: #1a1a1a;
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 16px;
-    white-space: nowrap;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.6), 0 0 0 2px rgba(0,0,0,0.1); 
-    border: 1px solid #ddd;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 9999 !important; 
-}
-
-.bocadillo.visible {
-    opacity: 1;
-}
-
-/* --- TÚ (Abajo) --- */
-.you .bocadillo {
-    bottom: 100%; left: 50%;
-    margin-bottom: 12px;
-    transform: translate(-50%, 10px);
-}
-.you .bocadillo.visible { transform: translate(-50%, 0); }
-.you .bocadillo::after {
-    content: ''; position: absolute; top: 100%; left: 50%; margin-left: -8px;
-    border-width: 8px; border-style: solid;
-    border-color: #ffffff transparent transparent transparent;
-}
-
-/* --- COMPAÑERO (Arriba) --- */
-.partner .bocadillo {
-    top: 100%; left: 50%;
-    margin-top: 12px;
-    transform: translate(-50%, -10px);
-}
-.partner .bocadillo.visible { transform: translate(-50%, 0); }
-.partner .bocadillo::after {
-    content: ''; position: absolute; bottom: 100%; left: 50%; margin-left: -8px;
-    border-width: 8px; border-style: solid;
-    border-color: transparent transparent #ffffff transparent;
-}
-
-/* --- RIVAL IZQUIERDO --- */
-.side-player.left .bocadillo {
-    left: 100%;
-    top: 50%;
-    margin-left: 5px;
-    transform: translate(0, -50%);
-}
-.side-player.left .bocadillo.visible {
-    transform: translate(0, -50%);
-}
-.side-player.left .bocadillo::after {
-    content: '';
-    position: absolute;
-    right: 100%;
-    top: 50%;
-    margin-top: -8px;
-    border-width: 8px;
-    border-style: solid;
-    border-color: transparent #ffffff transparent transparent;
-}
-
-/* --- RIVAL DERECHO --- */
-.side-player.right .bocadillo {
-    right: 100%;
-    left: auto;
-    top: 50%;
-    margin-right: 5px;
-    transform: translate(0, -50%);
-}
-.side-player.right .bocadillo.visible {
-    transform: translate(0, -50%);
-}
-.side-player.right .bocadillo::after {
-    content: '';
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    margin-top: -8px;
-    border-width: 8px;
-    border-style: solid;
-    border-color: transparent transparent transparent #ffffff;
-}
-
-/* --- COLORES DE LAS FLECHAS PARA RIVALES --- */
-.side-player.left .bocadillo.rojo::after {
-    border-color: transparent #ffe3e3 transparent transparent;
-}
-.side-player.right .bocadillo.rojo::after {
-    border-color: transparent transparent transparent #ffe3e3;
-}
-.side-player.left .bocadillo.verde::after {
-    border-color: transparent #dcfce7 transparent transparent;
-}
-.side-player.right .bocadillo.verde::after {
-    border-color: transparent transparent transparent #dcfce7;
-}
-
-.bocadillo.rojo { background: #ffe3e3; color: #b91c1c; }
-.bocadillo.rojo::after { border-color: #ffe3e3 transparent transparent transparent; }
-.partner .bocadillo.rojo::after { border-color: transparent transparent #ffe3e3 transparent; }
-
-.bocadillo.verde { background: #dcfce7; color: #15803d; }
-.bocadillo.verde::after { border-color: #dcfce7 transparent transparent transparent; }
-.partner .bocadillo.verde::after { border-color: transparent transparent #dcfce7 transparent; }
-
-/* =============================================
-   16. SISTEMA DE MAZO FIJO (Hueco Ficticio)
-   ============================================= */
-
-
-/* =============================================
    SISTEMA DE MAZO FIJO (Hueco Ficticio)
    ============================================= */
 
@@ -560,11 +444,10 @@ footer {
     position: static; /* Quitamos el relative para que no afecte */
 }
 
-
-/* Huecos ficticios: mismo tamaño para los cuatro jugadores */
+/* Huecos ficticios: mismo tamaño que el mazo real */
 .mazo-slot {
-    width: 75px;
-    height: calc(75px * (319 / 207));
+    width: var(--card-width);              /* 90px en escritorio */
+    height: var(--card-height);            /* 105px */
     box-sizing: border-box;
     visibility: hidden;
     pointer-events: none;
@@ -572,41 +455,52 @@ footer {
     z-index: 10;
 }
 
-
-/* =============================================
+//* =============================================
    POSICIÓN DEL HUECO RESPECTO A LA MESA
+   (cada hueco = esquina derecha del jugador)
    ============================================= */
 
-/* 1. COMPAÑERO (Arriba): A la izquierda de sus cartas */
-.partner .mazo-slot {
-    top: 1px;        /* Ajusta esta altura para que quede a la altura de sus cartas */
-    left: calc(-5% - 180px); /* A la izquierda del centro */
-    transform: none;
-}
-/* 2. RIVAL IZQUIERDO: Su hueco ahora está más arriba, cerca de su primera carta */
-.side-player.left .mazo-slot {
-    top: 280px;       /* Subimos el hueco para que el mazo quede sobre sus cartas */
-    left: 40px;
-    transform: rotate(90deg);
-    transform-origin: center center;
-}
+/* Base: el hueco se ancla al .hand-container */
+.hand-container { position: relative; }
 
-/* 3. RIVAL DERECHO: Su hueco ahora está más arriba, cerca de su primera carta */
-.side-player.right .mazo-slot {
-    top: 180px;       /* Subimos el hueco */
-    right: 60px;
-    left: auto;
-    transform: rotate(90deg);
-    transform-origin: center center;
-}
-/* 4. TÚ (Abajo): A la derecha de tus cartas */
+/* 1. TÚ (abajo): esquina inferior derecha de tu mano */
 .you .mazo-slot {
-    bottom: 10px;     /* A la altura de tu mano */
-    left: calc(60% + 190px); /* A la derecha del centro */
+    position: absolute;
     top: auto;
+    bottom: -5px;
+    left: auto;
+    right: -50px;
     transform: none;
 }
 
+/* 2. COMPAÑERO (arriba): esquina superior derecha de su mano */
+.partner .mazo-slot {
+    position: absolute;
+    top: 0ch;
+    bottom: auto;
+    left: auto;
+    right: 210px;
+    transform: none;
+}
+
+/* 3. RIVAL DERECHO: esquina exterior derecha (hacia fuera de la mesa) */
+.side-player.right .mazo-slot {
+    position: absolute;
+    top: 5%;
+    left: auto;
+    right: 0px;
+    transform: translateY(-50%);
+}
+
+/* 4. RIVAL IZQUIERDO: su "derecha" visual cae hacia el centro de la mesa,
+   porque sus cartas están rotadas. Queda a la derecha de su mano. */
+.side-player.left .mazo-slot {
+    position: absolute;
+    top:90%;
+    left: auto;
+    right: 60px;
+   transform: translateY(-50%) rotate(90deg);
+}
 .bet-token.amarraco {
     flex-basis: 42px;
     width: 42px;
@@ -642,8 +536,8 @@ footer {
 }
 
 .carta-sorteo .card {
-    flex: 0 1 200px !important;   /* Forzar tamaño, anulando la regla general de .card */
-    width: 145px !important;     /* Forzar tamaño, anulando la regla general de .card */
+    flex: 0 1 110px !important;   /* Forzar tamaño, anulando la regla general de .card */
+    width: 95px !important;     /* Forzar tamaño, anulando la regla general de .card */
     animation: carta-sorteo-entra 800ms ease-out;
     box-shadow: 0 8px 20px #000a, 0 0 0 4px #f1d28b;
 }
@@ -742,6 +636,32 @@ footer {
     to   { transform: translateY(0); opacity: 1; }
 }
 
+/* =============================================
+   MONTAÑA DE DESCARTES CENTRAL (APILADA)
+   ============================================= */
+
+#descarte-central {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0; 
+    height: 0;
+    z-index: 500;
+    pointer-events: none;
+}
+
+#descarte-central .card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Esto centra cada carta exactamente en el medio */
+}
+
+#descarte-central.hidden {
+    display: none !important;
+}
 /* =============================================
    11. VOLTEO AL FINAL DE LA MANO
    ============================================= */
@@ -852,9 +772,6 @@ footer {
     }
 }
 
-        
- /* =============================================
-
 /* =============================================
    17. PANTALLAS PEQUEÑAS (MÓVIL)
    ============================================= */
@@ -863,11 +780,12 @@ footer {
 
     .game {
         padding: 10px;
+         padding-top: calc(5px + env(safe-area-inset-top, 0px)); /* ▲ */
     }
 
-    .table {
-        height: 700px;
-        min-height: 700px;
+     .table {
+        height: 50px;        /* ▲ de 450px/700px a 620px */
+        min-height: 570px;
         padding: 8px;
         border-width: 5px;
         border-radius: 18px;
@@ -1013,6 +931,8 @@ footer {
     color: #ffffff;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    position: relative;  /* 👈 Para que nada se corte */
+    overflow-y: visible; /* 👈 Para que el botón no se recorte por arriba */
 }
 
 .marcador-tabla {
@@ -1174,98 +1094,6 @@ footer {
     position: relative;
 }
 
-/* Contenedor de puntos: no bloquea clics ni apuestas */
-#bet-area .puntos-jugador {
-    position: absolute;
-    z-index: 210;
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* <-- Aumentado el interlineado aquí */
-    pointer-events: none;
-    color: #fffaf0;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.4; /* <-- Más espacio entre líneas */
-    text-shadow: 0 1px 3px #00351c;
-    white-space: nowrap;
-}
-
-/* Compañero: borde superior (CENTRADO) */
-#bet-area .puntos-jugador-arriba {
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%); /* Centrado horizontal */
-    align-items: center;
-    text-align: center;
-}
-
-/* Rival derecho: borde derecho (ALINEADO A LA DERECHA) */
-#bet-area .puntos-jugador-derecha {
-    right: 15px;
-    top: 35%;
-    align-items: flex-end;
-    text-align: right;
-}
-
-/* Tú: borde inferior (CENTRADO) */
-#bet-area .puntos-jugador-abajo {
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    align-items: center;
-    text-align: center;
-}
-
-/* Rival izquierdo: borde izquierdo (ALINEADO A LA IZQUIERDA) */
-#bet-area .puntos-jugador-izquierda {
-    left: 15px;
-    top: 35%;
-    align-items: flex-start;
-    text-align: left;
-}
-
-/* Cada concepto ocupa su propia línea */
-#bet-area .puntos-jugador-linea {
-    display: block;
-    padding: 2px 0; /* Un poco de aire arriba y abajo */
-    background: transparent;
-}
-
-/* Ajuste para móvil */
-@media (max-width: 700px) {
-    #bet-area .puntos-jugador {
-        font-size: 12px;
-        gap: 4px;
-        line-height: 1.3;
-    }
-    #bet-area .puntos-jugador-arriba { top: 10px; }
-    #bet-area .puntos-jugador-abajo { bottom: 8px; }
-    #bet-area .puntos-jugador-derecha { right: 8px; }
-    #bet-area .puntos-jugador-izquierda { left: 8px; }
-}
-/* Posiciones finales de los huecos ficticios del mazo.
-   El rival izquierdo queda abajo, aproximadamente a la altura de la cuarta carta de tu mano. */
-.table { position: relative; }
-.side-player.left .mazo-slot {
-    top: 500px;
-    left: 8px;
-    right: auto;
-    bottom: auto;
-    transform: rotate(90deg);
-    transform-origin: center center;
-}
-@media (max-width: 700px) {
-    .side-player.left .mazo-slot {
-        top: 485px;
-        left: 4px;
-        right: auto;
-        bottom: auto;
-        transform: rotate(90deg);
-        transform-origin: center center;
-    }
-}
-}
-
 
 /* Ajuste final de las manos laterales en móvil */
 @media (max-width: 700px) {
@@ -1389,67 +1217,6 @@ footer {
     position: relative;
 }
 
-#bet-area .puntos-jugador {
-    position: absolute;
-    z-index: 210;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    pointer-events: none;
-    color: #fffaf0;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.25;
-    text-shadow: 0 1px 3px #00351c;
-    white-space: nowrap;
-}
-
-/* Compañero: borde superior */
-#bet-area .puntos-jugador-arriba {
-    top: 18px;
-    left: 12%;
-    align-items: flex-start;
-}
-
-/* Rival derecho: borde derecho */
-#bet-area .puntos-jugador-derecha {
-    right: 10px;
-    top: 35%;
-    align-items: flex-end;
-    text-align: right;
-}
-
-/* Tú: borde inferior */
-#bet-area .puntos-jugador-abajo {
-    bottom: 12px;
-    left: 12%;
-    align-items: flex-start;
-}
-
-/* Rival izquierdo: borde izquierdo */
-#bet-area .puntos-jugador-izquierda {
-    left: 10px;
-    top: 35%;
-    align-items: flex-start;
-    text-align: left;
-}
-
-#bet-area .puntos-jugador-linea {
-    display: block;
-    padding: 1px 3px;
-    background: transparent;
-}
-
-@media (max-width: 700px) {
-    #bet-area .puntos-jugador {
-        font-size: 12px;
-        gap: 2px;
-    }
-    #bet-area .puntos-jugador-arriba { top: 10px; left: 50%; }
-    #bet-area .puntos-jugador-abajo { bottom: 8px; left: 50%; }
-    #bet-area .puntos-jugador-derecha { right: 5px; top: 35%; }
-    #bet-area .puntos-jugador-izquierda { left: 5px; top: 35%; }
-}
 /* =============================================
    18. MARCA DE AGUA "MUS"
    ============================================= */
@@ -1459,49 +1226,34 @@ footer {
     text-align: center;
 }
 
+#mus-text-overlay .signature {
+    font-family: 'Harlow Solid Italic', serif;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: var(--gold);
+    opacity: 1;
+    margin-top: 3px; /* Ajuste para acercarlo */
+}
+
 #mus-text-overlay.visible {
     display: flex; /* Cambiado a flex para alinear contenido */
     flex-direction: column;
     justify-content: center;
     align-items: center;
     font-family: 'OHarlow Solid Italic', serif;
-    font-size: 6rem;
+    font-size:3.8rem;
     color: var(--gold);
     position: absolute;
-    top: 45%;
-    left: 49%;
-    transform: translate(-50%, -50%) rotate(-45deg);
+    top: 49%;
+    left: 52%;
+    transform: translate(-50%, -50%) rotate(-47deg);
     opacity: 0.35;
     z-index: 50;
     pointer-events: none; /* Para que no interfiera con los clics */
 }
 
-#mus-text-overlay .signature {
-    font-family: 'Harlow Solid Italic', serif;
-    font-size: 1rem;
-    font-weight: bold;
-    color: var(--gold);
-    opacity: 1;
-    margin-top: 5px; /* Ajuste para acercarlo */
-}
 
-/* =============================================
-   AJUSTE PROGRESIVO DEL TABLERO EN MÓVIL
-   ============================================= */
 
-@media (max-width: 700px) {
-
-    .table {
-        height: 450px;
-        min-height: 450px;
-    }
-
-    .center-message {
-        width: 52%;
-        height: 38%;
-    }
-
-}
 
 /* =============================================
    19. PANEL DINÁMICO DE CONTROLES
@@ -1519,20 +1271,19 @@ footer {
 @media (max-width: 700px) {
 
     /* Panel compacto debajo del tablero */
-    #controls-panel {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 7px;
-        margin: 8px 0 0;
-        padding: 0;
-        width: 100%;
-    }
+#controls-panel {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 8px 0;      /* 👈 Aquí tienes el margen */
+    margin-bottom: 20px; /* 👈 Añade esta línea para separarlo de los iconos */
+}
 
     /* Botones más compactos */
     #controls-panel button {
-        padding: 10px 12px;
+        padding: 10px 12
+        px;
         font-size: 12px;
         margin: 0;
     }
@@ -1559,12 +1310,410 @@ footer {
     display: none !important;
 }
 
-/* Ocultar el botón Historial, conservando su código */
+/* Botón H del historial: flotante, no modifica las medidas del marcador. */
+.marcador-movil { position: relative; overflow-y: visible; }
+
 #historial-partida-btn {
-    display: none !important;
+    position: absolute !important;
+    top: 0;             /* 👈 Pegado arriba */
+    left: 10px;         /* 👈 CAMBIO: Ahora a la IZQUIERDA */
+    right: auto;        /* 👈 Aseguramos que no haya conflicto */
+    z-index: 99999;
+    width: 23px;
+    height: 23px;
+    min-width: 23px;
+    padding: 0;
+    border: 1px solid #f1d28b;
+    border-radius: 50%;
+    background: #10472e;
+    color: #f1d28b;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 21px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+#historial-partida-panel {
+    position: fixed;
+    z-index: 20000;
+    top: 12%;
+    left: 5%;
+    width: 90%;
+    max-height: 75dvh;
+    overflow: auto;
+    padding: 12px;
+    border: 2px solid #d9b66b;
+    border-radius: 12px;
+    background: #103b29;
+    color: #fff;
+    box-shadow: 0 8px 30px #000b;
+}
+#historial-partida-panel[hidden] { display: none !important; }
+#historial-partida-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 48dvh; overflow: auto; font-size: 12px; }
+.historial-cabecera, .historial-acciones { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* =============================================
+   21. REDUCCIÓN DE CARTAS, MAZO Y HUECOS EN MÓVIL
+   Reducción de 60 px a 40 px (un tercio)
+   ============================================= */
+
+@media (max-width: 700px) {
+
+    /* Cartas de los cuatro jugadores y sus huecos */
+    .table .hand > .card,
+    .table .hand > .card-slot {
+        box-sizing: border-box;
+        flex: 0 0 40px !important;
+        width: 45px !important;
+        min-width: 45px !important;
+        max-width: 45px !important;
+        height: calc(45px * (319 / 207)) !important;
+        aspect-ratio: 207 / 319;
+    }
+
+    /* Separación entre cartas */
+    .table .hand {
+        gap: 3px;
+    }
+
+    /* Manos de los jugadores laterales */
+    .side-player .hand {
+        width: 152px !important;
+    }
+
+    .side-player .card,
+    .side-player .card-slot {
+        flex: 0 0 40px !important;
+        width: 40px !important;
+    }
+
+    /* Mazo fijo y cuatro huecos ficticios */
+    .table .mazo-slot,
+    .table .mazo-fijo {
+        box-sizing: border-box;
+        width: 45px !important;
+        min-width: 45px !important;
+        height: calc(45px * (319 / 207)) !important;
+    }
+
+    /* La carta que forma parte del mazo */
+    .table .mazo-fijo .card {
+        width: 45px !important;
+        height: calc(45px* (319 / 207)) !important;
+    }
+
+    /* Mantener las imágenes dentro de las cartas */
+    .table .card img,
+    .table .card-slot img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+/* =============================================
+   21. AJUSTE DE CARTAS LATERALES Y CENTRO
+   ============================================= */
+
+@media (max-width: 700px) {
+
+    /* Cartas de los jugadores laterales:
+       mantener las cuatro juntas y desplazarlas
+       hacia el interior de la mesa */
+    .side-player .hand {
+        width: 192px !important;
+        gap: 3px !important;
+    }
+
+    .side-player.left .hand {
+        left: 10px !important;
+        right: auto !important;
+        transform: translate(-50%, -50%) rotate(-90deg) !important;
+    }
+
+    .side-player.right .hand {
+        left: auto !important;
+        right: 10px !important;
+        transform: translate(50%, -50%) rotate(90deg) !important;
+    }
+
+    /* Mantener las cartas laterales a 40 px */
+    .side-player .hand > .card,
+    .side-player .hand > .card-slot {
+        flex: 0 0 40px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: calc(40px * (319 / 207)) !important;
+    }
+
+    /* Reducir el rectángulo central en consonancia */
+    .center-message {
+        width: 47% !important;
+    }
+}
+@media (max-width: 700px) {
+    .mazo-slot {
+        width: 45px;
+        height: calc(45px * (319 / 207));
+    }
+    .mazo-fijo {
+        width: 45px;
+        height: calc(45px * (319 / 207));
+    }
+}
+/* =============================================
+   BOCADILLOS DE TEXTO (ÚNICO BLOQUE DEFINITIVO CORREGIDO)
+   ============================================= */
+
+.bocadillo {
+    position: absolute;
+    z-index: 99999;
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 6px 8px;        /* Más pequeño (antes 14px 18px) */
+    font-size: 11px;          /* Letra más pequeña (antes 16px) */
+    border-radius: 8px;       /* Un poco menos redondeado */
+    font-weight: bold;
+    text-align: center;       /* Para que el texto se vea bien en varias líneas */
+    line-height: 1.2;
+    white-space: normal;      /* Permitimos saltos de línea (antes nowrap) */
+    min-width: 60px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.1);
+    border: 1px solid transparent; 
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Mantener también oculto el panel del historial */
-#historial-partida-panel {
-    display: none !important;
+.bocadillo.visible {
+    opacity: 1;
+}
+
+/* --- POSICIONES --- */
+.bocadillo-abajo {
+    bottom: 100%;
+    left: 50%;
+    margin-bottom: 10px;
+    transform: translate(-50%, 10px);
+}
+.bocadillo-abajo.visible { transform: translate(-50%, 0); }
+
+.bocadillo-arriba {
+    top: 100%;
+    left: 50%;
+    margin-top: 10px;
+    transform: translate(-50%, -10px);
+}
+.bocadillo-arriba.visible { transform: translate(-50%, 0); }
+
+.bocadillo-izquierda {
+    left: 50%; top: 50%;
+    margin-left: 8px;
+    transform: translate(0, -50%) translateX(-10px);
+}
+.bocadillo-izquierda.visible { transform: translate(0, -50%) translateX(0); }
+
+.bocadillo-derecha {
+    right: 50%; top: 50%;
+    margin-right: 8px;
+    transform: translate(0, -50%) translateX(10px);
+}
+.bocadillo-derecha.visible { transform: translate(0, -50%) translateX(0); }
+
+/* --- FLECHAS BASE (Apuntando hacia el jugador) --- */
+.bocadillo-abajo::after {
+    content: ''; position: absolute;
+    top: 100%; left: 50%; margin-left: -6px;
+    border-width: 6px; border-style: solid;
+    border-color: #ffffff transparent transparent transparent; /* ↓ */
+}
+.bocadillo-arriba::after {
+    content: ''; position: absolute;
+    bottom: 100%; left: 50%; margin-left: -6px;
+    border-width: 6px; border-style: solid;
+    border-color: transparent transparent #ffffff transparent; /* ↑ */
+}
+.bocadillo-izquierda::after {
+    content: ''; position: absolute;
+    right: 100%; top: 50%; margin-top: -6px;
+    border-width: 6px; border-style: solid;
+    border-color: transparent #ffffff transparent transparent; /* ← */
+}
+.bocadillo-derecha::after {
+    content: ''; position: absolute;
+    left: 100%; top: 50%; margin-top: -6px;
+    border-width: 6px; border-style: solid;
+    border-color: transparent transparent transparent #ffffff; /* → */
+}
+
+
+/* =============================================
+   COLORES DE EQUIPO (NARANJA Y AZUL) - ¡AQUÍ ESTÁ LO QUE FALTABA!
+   ============================================= */
+
+/* EQUIPO NOSOTROS (Naranja) */
+.bocadillo.equipo-nosotros {
+    background: #ed8918; 
+    color: #ffffff; 
+    border-color: #ed8918;
+}
+.bocadillo.equipo-nosotros.bocadillo-abajo::after    { border-color: #ed8918 transparent transparent transparent; }
+.bocadillo.equipo-nosotros.bocadillo-arriba::after   { border-color: transparent transparent #ed8918 transparent; }
+.bocadillo.equipo-nosotros.bocadillo-izquierda::after{ border-color: transparent #ed8918 transparent transparent; }
+.bocadillo.equipo-nosotros.bocadillo-derecha::after  { border-color: transparent transparent transparent #ed8918; }
+
+/* EQUIPO ELLOS (Azul) */
+.bocadillo.equipo-ellos {
+    background: #399ddd; 
+    color: #ffffff; 
+    border-color: #399ddd;
+}
+.bocadillo.equipo-ellos.bocadillo-abajo::after    { border-color: #399ddd transparent transparent transparent; }
+.bocadillo.equipo-ellos.bocadillo-arriba::after   { border-color: transparent transparent #399ddd transparent; }
+.bocadillo.equipo-ellos.bocadillo-izquierda::after{ border-color: transparent #399ddd transparent transparent; }
+.bocadillo.equipo-ellos.bocadillo-derecha::after  { border-color: transparent transparent transparent #399ddd; }
+
+/* =============================================
+   COLORES DE ACCIÓN (ROJO Y VERDE)
+   ============================================= */
+.bocadillo.rojo  { background: #ffe3e3; color: #b91c1c; border-color: #ffe3e3; }
+.bocadillo.verde { background: #dcfce7; color: #15803d; border-color: #dcfce7; }
+
+.bocadillo.rojo.bocadillo-abajo::after    { border-color: #ffe3e3 transparent transparent transparent; }
+.bocadillo.rojo.bocadillo-arriba::after   { border-color: transparent transparent #ffe3e3 transparent; }
+.bocadillo.rojo.bocadillo-izquierda::after{ border-color: transparent #ffe3e3 transparent transparent; }
+.bocadillo.rojo.bocadillo-derecha::after  { border-color: transparent transparent transparent #ffe3e3; }
+
+.bocadillo.verde.bocadillo-abajo::after    { border-color: #dcfce7 transparent transparent transparent; }
+.bocadillo.verde.bocadillo-arriba::after   { border-color: transparent transparent #dcfce7 transparent; }
+.bocadillo.verde.bocadillo-izquierda::after{ border-color: transparent #dcfce7 transparent transparent; }
+.bocadillo.verde.bocadillo-derecha::after  { border-color: transparent transparent transparent #dcfce7; }
+
+/* Ajustes de las cinco mejoras solicitadas */
+#bet-area { isolation: isolate; overflow: visible; }
+#bet-area .puntos-jugador { 
+    z-index: 900 !important; 
+    max-width: 45%; 
+    display: flex !important;           /* 👈 Forzamos que sea flex */
+    flex-direction: column !important;  /* 👈 Y que vaya en columna (uno debajo de otro) */
+    align-items: flex-start;            /* 👈 Alineados a la izquierda */
+    gap: 2px;                           /* 👈 Un poco de separación entre líneas */
+}
+#bet-area .puntos-jugador-linea { color: #ffe16b; background: rgba(0,0,0,.38); border-radius: 4px; padding: 2px 4px; }
+#bet-area .puntos-jugador-arriba { top: 4px; left: 8px; }
+#bet-area .puntos-jugador-abajo { bottom: 4px; left: 8px; }
+#bet-area .puntos-jugador-derecha { right: 5px; top: 8px; }
+#bet-area .puntos-jugador-izquierda { left: 5px; top: 8px; }
+#bet-area #mus-text-overlay.visible {
+    display: flex;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-47deg);
+    z-index: 20;
+    pointer-events: none;
+    opacity: .28;
+}
+#descarte-central .card {
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: calc(44px * (319 / 207)) !important;
+    box-sizing: border-box;
+}
+/* =========================================
+   PUNTOS EXTRA JUNTO A CADA JUGADOR (ÚNICO BLOQUE)
+   ========================================= */
+
+#bet-area {
+    position: relative;
+    isolation: isolate; 
+    overflow: visible;
+}
+
+#bet-area .puntos-jugador {
+    position: absolute;
+    z-index: 900;
+    /* AQUÍ ESTÁ LA MAGIA PARA QUE SE APILEN EN COLUMNA */
+    display: flex !important; 
+    flex-direction: column !important;
+    gap: 3px;
+    pointer-events: none;
+    color: #ffd400;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px #000, 0 0 4px #000;
+    white-space: nowrap;
+    max-width: 45%;
+}
+
+/* Posiciones en escritorio */
+#bet-area .puntos-jugador-arriba {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+#bet-area .puntos-jugador-derecha {
+    right: 10px;
+    top: 65%;
+    transform: translateY(-50%);
+    align-items: flex-end;
+    text-align: right;
+}
+
+#bet-area .puntos-jugador-abajo {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+#bet-area .puntos-jugador-izquierda {
+    left: 10px;
+    top: 35%;
+    transform: translateY(-50%);
+    align-items: flex-start;
+    text-align: left;
+}
+
+#bet-area .puntos-jugador-linea {
+    display: block;
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 4px;
+    color: #ffe16b;
+}
+
+/* Ajuste para móvil */
+@media (max-width: 700px) {
+    #bet-area .puntos-jugador { 
+        font-size: 11px !important; 
+        line-height: 1.15; 
+        max-width: 46%; 
+        gap: 2px !important;
+    }
+    #bet-area .puntos-jugador-arriba { top: 5px; }
+    #bet-area .puntos-jugador-abajo { bottom: 5px; }
+    #bet-area .puntos-jugador-derecha { right: 5px; }
+    #bet-area .puntos-jugador-izquierda { left: 5px; }
+}
+@media (max-width: 700px) {
+    .game {
+        margin-top: 5px; /* 👈 Más margen en móvil para evitar el notch */
+    }
+}
+ @media (max-width: 700px) {
+    #historial-partida-btn {
+        top: 5px;
+        left: 5px;     /* 👈 CAMBIO: A la izquierda también en móvil */
+        right: auto;   /* 👈 Limpiamos el right */
+        width: 21px;
+        height: 21px;
+        min-width: 21px;
+        line-height: 19px;
+        font-size: 11px;
+    }
 }
